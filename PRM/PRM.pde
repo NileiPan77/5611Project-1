@@ -518,11 +518,9 @@ void runBFS(){
   //print("\n");
 }
 
-void runAstar(){
-
-
+void updateAgent(float dt){
+  
 }
-
 
 /////////////////////////////////
 // Vec2 Library
