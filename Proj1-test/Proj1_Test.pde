@@ -10,7 +10,7 @@
 // The arrow keys will move the circular obstacle with the heavy outline
 // Pressing 'r' will randomize the obstacles and re-run the tests
 
-//Camera camera;
+Camera camera;
 //Change the below parameters to change the scenario/roadmap size
 int numObstacles = 100;
 int numNodes  = 100;
@@ -58,16 +58,16 @@ int strokeWidth = 2;
 void setup(){
   size(1024,768);
   testPRM();
-  //camera = new Camera();
-  //camera.position = new PVector(0,0,25);
-  //noStroke();
+  camera = new Camera();
+  camera.position = new PVector(0,0,25);
+  noStroke();
   
   //// Set the blending mode to BLEND (this is standard "alpha blending").
-  //blendMode(BLEND);
+  blendMode(BLEND);
   
   //// Enable depth sorting.
   //// NOTE: In Processing, you must enable depth sorting manually since it's considered an expensive operation.
-  //hint(ENABLE_DEPTH_SORT);
+  hint(ENABLE_DEPTH_SORT);
 }
 
 int numCollisions;
@@ -213,7 +213,7 @@ void draw(){
 
 boolean shiftDown = false;
 void keyPressed(){
-  //camera.HandleKeyPressed();
+  camera.HandleKeyPressed();
   if (key == 'r'){
     testPRM();
     return;
@@ -242,14 +242,14 @@ void keyPressed(){
 }
 
 void keyReleased(){
-  //camera.HandleKeyReleased();
+  camera.HandleKeyReleased();
   if (keyCode == SHIFT){
     shiftDown = false;
   }
 }
 
 void mousePressed(){
-  //camera.mousePressed();
+  camera.mousePressed();
   if (mouseButton == RIGHT){
     startPos = new Vec2(mouseX, mouseY);
     //println("New Start is",startPos.x, startPos.y);
@@ -263,13 +263,13 @@ void mousePressed(){
 }
 
 void mouseReleased(){
-    //camera.mouseReleased(); 
+    camera.mouseReleased(); 
 }
 
 void mouseDragged(){
-   //camera.mouseDragged(); 
+   camera.mouseDragged(); 
 }
 
 void mouseWheel(MouseEvent event){
-  //camera.mouseWheel(event);
+  camera.mouseWheel(event);
 }

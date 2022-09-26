@@ -11,7 +11,7 @@
 // Pressing 'r' will randomize the obstacles and re-run the tests
 
 import java.util.*;
-//Camera camera;
+Camera camera;
 //Change the below parameters to change the scenario/roadmap size
 int numObstacles = 50;
 int numNodes  = 100;
@@ -65,16 +65,16 @@ void setup(){
   circleRad[0] = 30;
   numObstacles = 1;
   testPRM();
-  //camera = new Camera();
-  //camera.position = new PVector(0,0,25);
-  //noStroke();
+  camera = new Camera();
+  camera.position = new PVector(0,0,25);
+  noStroke();
   
   //// Set the blending mode to BLEND (this is standard "alpha blending").
-  //blendMode(BLEND);
+  blendMode(BLEND);
   
   //// Enable depth sorting.
   //// NOTE: In Processing, you must enable depth sorting manually since it's considered an expensive operation.
-  //hint(ENABLE_DEPTH_SORT);
+  hint(ENABLE_DEPTH_SORT);
 }
 
 int numCollisions;
@@ -202,8 +202,8 @@ void draw(){
       stroke(100,100,100);
       strokeWeight(1);
       for (int i = 0; i < numNodes; i++){
-        for (int j : neighbors[i]){
-          line(nodePos[i].x,nodePos[i].y,nodePos[j].x,nodePos[j].y);
+        for (int j = 0; j < neighbors[i].size(); j++){
+          line(nodePos[i].x,nodePos[i].y,nodePos[neighbors[i].get(j).x].x,nodePos[neighbors[i].get(j).x].y);
         }
       }
       
@@ -265,7 +265,7 @@ void draw(){
 
 boolean shiftDown = false;
 void keyPressed(){
-  //camera.HandleKeyPressed();
+  camera.HandleKeyPressed();
   if(key == ' '){
     paused = !paused;
   }
@@ -306,14 +306,14 @@ void keyPressed(){
 }
 
 void keyReleased(){
-  //camera.HandleKeyReleased();
+  camera.HandleKeyReleased();
   if (keyCode == SHIFT){
     shiftDown = false;
   }
 }
 
 void mousePressed(){
-  //camera.mousePressed();
+  camera.mousePressed();
   if(paused){
     if(mouseButton == LEFT){
        circlePos[numObstacles] = new Vec2(mouseX,mouseY);
@@ -340,13 +340,13 @@ void mousePressed(){
 }
 
 void mouseReleased(){
-    //camera.mouseReleased(); 
+    camera.mouseReleased(); 
 }
 
 void mouseDragged(){
-   //camera.mouseDragged(); 
+   camera.mouseDragged(); 
 }
 
 void mouseWheel(MouseEvent event){
-  //camera.mouseWheel(event);
+  camera.mouseWheel(event);
 }
