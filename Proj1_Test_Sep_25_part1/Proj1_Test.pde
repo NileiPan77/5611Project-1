@@ -75,7 +75,7 @@ void pathQuality(){
     segmentLength = startPos.distanceTo(goalPos);
     pathLength += segmentLength;
     dir = goalPos.minus(startPos).normalized();
-    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
+    hit = rayCircleListIntesect(circlePos, circleRad, startPos, dir, segmentLength);
     if (hit.hit) numCollisions += 1;
     return;
   }
@@ -83,7 +83,7 @@ void pathQuality(){
   segmentLength = startPos.distanceTo(nodePos[curPath.get(0)]);
   pathLength += segmentLength;
   dir = nodePos[curPath.get(0)].minus(startPos).normalized();
-  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
+  hit = rayCircleListIntesect(circlePos, circleRad, startPos, dir, segmentLength);
   if (hit.hit) numCollisions += 1;
   
   
@@ -94,7 +94,7 @@ void pathQuality(){
     pathLength += segmentLength;
     
     dir = nodePos[nextNode].minus(nodePos[curNode]).normalized();
-    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[curNode], dir, segmentLength, startAgentRadius);
+    hit = rayCircleListIntesect(circlePos, circleRad, nodePos[curNode], dir, segmentLength);
     if (hit.hit) numCollisions += 1;
   }
   
@@ -102,7 +102,7 @@ void pathQuality(){
   segmentLength = nodePos[lastNode].distanceTo(goalPos);
   pathLength += segmentLength;
   dir = goalPos.minus(nodePos[lastNode]).normalized();
-  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[lastNode], dir, segmentLength, startAgentRadius);
+  hit = rayCircleListIntesect(circlePos, circleRad, nodePos[lastNode], dir, segmentLength);
   if (hit.hit) numCollisions += 1;
 }
 

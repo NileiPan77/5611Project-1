@@ -58,7 +58,7 @@ void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] no
       if (i == j) continue; //don't connect to myself 
       Vec2 dir = nodePos[j].minus(nodePos[i]).normalized();
       float distBetween = nodePos[i].distanceTo(nodePos[j]);
-      hitInfo circleListCheck = rayCircleListIntesect(centers, radii, nodePos[i], dir, distBetween);
+          hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir, distBetween, startAgentRadius);
       if (!circleListCheck.hit ){
         Pair tmp = new Pair();
         tmp.x = j;

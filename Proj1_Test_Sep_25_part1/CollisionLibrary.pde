@@ -29,9 +29,9 @@ class hitInfo{
   public float t = 9999999;
 }
 
-hitInfo rayCircleIntersect(Vec2 center, float r, Vec2 l_start, Vec2 l_dir, float max_t, float eps){
+hitInfo rayCircleIntesect(Vec2 center, float r, Vec2 l_start, Vec2 l_dir, float max_t){
   hitInfo hit = new hitInfo();
-  r += eps;
+  
   //Step 2: Compute W - a displacement vector pointing from the start of the line segment to the center of the circle
     Vec2 toCircle = center.minus(l_start);
     
@@ -62,14 +62,14 @@ hitInfo rayCircleIntersect(Vec2 center, float r, Vec2 l_start, Vec2 l_dir, float
   return hit;
 }
 
-hitInfo rayCircleListIntersect(Vec2[] centers, float[] radii, int numObstacles, Vec2 l_start, Vec2 l_dir, float max_t, float eps){
+hitInfo rayCircleListIntesect(Vec2[] centers, float[] radii, Vec2 l_start, Vec2 l_dir, float max_t){
   hitInfo hit = new hitInfo();
   hit.t = max_t;
   for (int i = 0; i < numObstacles; i++){
     Vec2 center = centers[i];
     float r = radii[i];
     
-    hitInfo circleHit = rayCircleIntersect(center, r, l_start, l_dir, hit.t,eps);
+    hitInfo circleHit = rayCircleIntesect(center, r, l_start, l_dir, hit.t);
     if (circleHit.t > 0 && circleHit.t < hit.t){
       hit.hit = true;
       hit.t = circleHit.t;
