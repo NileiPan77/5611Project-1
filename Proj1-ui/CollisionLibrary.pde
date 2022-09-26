@@ -22,7 +22,7 @@ boolean pointInBoxs(Vec2[] boxTopLefts, float boxW, float boxH, Vec2 pointPos){
 //You must consider a point as colliding if it's distance is <= eps
 boolean pointInCircle(Vec2 center, float r, Vec2 pointPos, float eps){
   float dist = pointPos.distanceTo(center);
-  if (dist < r+eps){
+  if (dist < r+eps+2){
     return true;
   }
   return false;
@@ -105,7 +105,7 @@ hitInfo rayBoxesListIntersect(Vec2[] boxTopLefts, int numBoxes, float boxW, floa
 }
 hitInfo rayCircleIntersect(Vec2 center, float r, Vec2 l_start, Vec2 l_dir, float max_t, float eps){
   hitInfo hit = new hitInfo();
-  r += eps;
+  r += eps+2;
   //Step 2: Compute W - a displacement vector pointing from the start of the line segment to the center of the circle
     Vec2 toCircle = center.minus(l_start);
     

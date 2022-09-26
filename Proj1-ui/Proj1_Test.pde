@@ -14,7 +14,7 @@ import java.util.*;
 //Camera camera;
 //Change the below parameters to change the scenario/roadmap size
 int numObstacles = 50;
-int numNodes  = 100;
+int numNodes  = 200;
 boolean paused = true;
 boolean firstTimeSetup = true;
 //A list of circle obstacles
@@ -22,8 +22,16 @@ static int maxNumObstacles = 1000;
 Vec2 circlePos[] = new Vec2[maxNumObstacles]; //Circle positions
 float circleRad[] = new float[maxNumObstacles];  //Circle radii
 
+
+
+
+
 Vec2 startPos = new Vec2(100,500);
 Vec2 goalPos = new Vec2(500,200);
+
+int numAgents = 0;
+int maxNumAgents = 10;
+Vec2 agents[] = new Vec2[maxNumAgents];
 
 int startAgentRadius = 10;
 static int maxNumNodes = 1000;
@@ -55,7 +63,7 @@ void placeRandomObstacles(int numObstacles){
   numObstacles = 1;
 }
 
-ArrayList<Integer> curPath;
+ArrayList<Integer>[] curPath = new ArrayList[maxNumAgents];
 
 
 int strokeWidth = 2;
@@ -81,49 +89,49 @@ int numCollisions;
 float pathLength;
 boolean reachedGoal;
 
-void pathQuality(){
-  Vec2 dir;
-  hitInfo hit;
-  float segmentLength;
-  numCollisions = 9999; pathLength = 9999;
-  if (curPath.size() == 1 && curPath.get(0) == -1) return; //No path found  
+//void pathQuality(){
+//  Vec2 dir;
+//  hitInfo hit;
+//  float segmentLength;
+//  numCollisions = 9999; pathLength = 9999;
+//  if (curPath.size() == 1 && curPath.get(0) == -1) return; //No path found  
   
-  pathLength = 0; numCollisions = 0;
+//  pathLength = 0; numCollisions = 0;
   
-  if (curPath.size() == 0 ){ //Path found with no nodes (direct start-to-goal path)
-    segmentLength = startPos.distanceTo(goalPos);
-    pathLength += segmentLength;
-    dir = goalPos.minus(startPos).normalized();
-    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
-    if (hit.hit) numCollisions += 1;
-    return;
-  }
+//  if (curPath.size() == 0 ){ //Path found with no nodes (direct start-to-goal path)
+//    segmentLength = startPos.distanceTo(goalPos);
+//    pathLength += segmentLength;
+//    dir = goalPos.minus(startPos).normalized();
+//    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
+//    if (hit.hit) numCollisions += 1;
+//    return;
+//  }
   
-  segmentLength = startPos.distanceTo(nodePos[curPath.get(0)]);
-  pathLength += segmentLength;
-  dir = nodePos[curPath.get(0)].minus(startPos).normalized();
-  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
-  if (hit.hit) numCollisions += 1;
+//  segmentLength = startPos.distanceTo(nodePos[curPath.get(0)]);
+//  pathLength += segmentLength;
+//  dir = nodePos[curPath.get(0)].minus(startPos).normalized();
+//  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
+//  if (hit.hit) numCollisions += 1;
   
   
-  for (int i = 0; i < curPath.size()-1; i++){
-    int curNode = curPath.get(i);
-    int nextNode = curPath.get(i+1);
-    segmentLength = nodePos[curNode].distanceTo(nodePos[nextNode]);
-    pathLength += segmentLength;
+//  for (int i = 0; i < curPath.size()-1; i++){
+//    int curNode = curPath.get(i);
+//    int nextNode = curPath.get(i+1);
+//    segmentLength = nodePos[curNode].distanceTo(nodePos[nextNode]);
+//    pathLength += segmentLength;
     
-    dir = nodePos[nextNode].minus(nodePos[curNode]).normalized();
-    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[curNode], dir, segmentLength, startAgentRadius);
-    if (hit.hit) numCollisions += 1;
-  }
+//    dir = nodePos[nextNode].minus(nodePos[curNode]).normalized();
+//    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[curNode], dir, segmentLength, startAgentRadius);
+//    if (hit.hit) numCollisions += 1;
+//  }
   
-  int lastNode = curPath.get(curPath.size()-1);
-  segmentLength = nodePos[lastNode].distanceTo(goalPos);
-  pathLength += segmentLength;
-  dir = goalPos.minus(nodePos[lastNode]).normalized();
-  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[lastNode], dir, segmentLength, startAgentRadius);
-  if (hit.hit) numCollisions += 1;
-}
+//  int lastNode = curPath.get(curPath.size()-1);
+//  segmentLength = nodePos[lastNode].distanceTo(goalPos);
+//  pathLength += segmentLength;
+//  dir = goalPos.minus(nodePos[lastNode]).normalized();
+//  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[lastNode], dir, segmentLength, startAgentRadius);
+//  if (hit.hit) numCollisions += 1;
+//}
 
 Vec2 sampleFreePos(){
   Vec2 randPos = new Vec2(random(width),random(height));
@@ -142,39 +150,45 @@ void testPRM(){
       
       goalPos = sampleFreePos();
       
-      generateRandomNodesGoalCentric(startPos,goalPos,circlePos, circleRad, numObstacles,nodePos, numNodes);
+      generateRandomNodesGoalCentric(agents,goalPos,circlePos, circleRad, numObstacles,nodePos, numNodes,numAgents);
       //generateRandomNodes(numNodes, circlePos, circleRad);
-      connectNeighbors(circlePos, circleRad, numObstacles, nodePos, numNodes,startPos,goalPos);
+      connectNeighbors(circlePos, circleRad, numObstacles, nodePos, numNodes);
       
       startTime = System.nanoTime();
-      curPath = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes);
+      ArrayList<Integer>[] tempPaths  = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes,numAgents);
+      for(int i = 0; i < tempPaths.length; i++){
+         curPath[i] = tempPaths[i]; 
+      }
       endTime = System.nanoTime();
-      pathQuality();
+      //pathQuality();
       
-      println("Nodes:", numNodes," Obstacles:", numObstacles," Time (us):", int((endTime-startTime)/1000),
-              " Path Len:", pathLength, " Path Segment:", curPath.size()+1,  " Num Collisions:", numCollisions);
+      for(int i = 0; i < numAgents; i++){
+        println("Nodes:", numNodes," Obstacles:", numObstacles," Time (us):", int((endTime-startTime)/1000),
+              " Path Len:", pathLength, " Path Segment:", curPath[i].size()+1,  " Num Collisions:", numCollisions);
+      }
+      
    }
   
 }
 
 
-int curPathIndex = 0;
+int []curPathIndex = new int[maxNumAgents];
 float speed = 30;
 Vec2 agentDir;
 
 
-void updateAgent(float dt){
-   if (curPath.size() >0 && curPath.get(0) == -1) return;
-   if(curPathIndex >= curPath.size()) return;
-   Vec2 curGoal = nodePos[curPath.get(curPathIndex)];
-   agentDir = nodePos[curPath.get(curPathIndex)].minus(startPos);
-   if(startPos.distanceTo(curGoal) < speed * dt){
-       startPos = curGoal;
-       curPathIndex++;
+void updateAgent(float dt, int agentId){
+   if (curPath[agentId].size() >0 && curPath[agentId].get(0) == -1) return;
+   if(curPathIndex[agentId] >= curPath[agentId].size()) return;
+   Vec2 curGoal = nodePos[curPath[agentId].get(curPathIndex[agentId])];
+   agentDir = nodePos[curPath[agentId].get(curPathIndex[agentId])].minus(agents[agentId]);
+   if(agents[agentId].distanceTo(curGoal) < speed * dt){
+       agents[agentId] = curGoal;
+       curPathIndex[agentId]++;
    }else{
        //println("moving towards: ",curPath.get(curPathIndex));
        agentDir.normalize();
-       startPos.add(agentDir.times(speed*dt));
+       agents[agentId].add(agentDir.times(speed*dt));
    }
 }
 
@@ -191,7 +205,10 @@ void draw(){
       testPRM();
       firstTimeSetup = false;
     }
-    updateAgent(1/frameRate);
+    for(int i = 0; i < numAgents; i++){
+      updateAgent(1/frameRate,i);
+    }
+    
     
     //Draw PRM Nodes
     fill(0);
@@ -213,23 +230,26 @@ void draw(){
       circle(goalPos.x,goalPos.y,20);
       
       //No path found
-      if (curPath.size() >0 && curPath.get(0) != -1){
-        //Draw Planned Path
-        stroke(20,255,40);
-        strokeWeight(5);
-        if (curPath.size() == 0){
-          line(startPos.x,startPos.y,goalPos.x,goalPos.y);
-          return;
+      for(int i = 0; i < numAgents; i++){
+          if (curPath[i].size() >0 && curPath[i].get(0) != -1){
+              //Draw Planned Path
+              stroke(20,255,40);
+              strokeWeight(5);
+              if (curPath[i].size() == 0){
+                line(agents[i].x,agents[i].y,goalPos.x,goalPos.y);
+                return;
+              }
+              //line(startPos.x,startPos.y,nodePos[curPath.get(0)].x,nodePos[curPath.get(0)].y);
+              
+              for (int j = curPathIndex[i] == 0 ? 0:curPathIndex[i]-1; j < curPath[i].size()-1; j++){
+                int curNode = curPath[i].get(j);
+                int nextNode = curPath[i].get(j+1);
+                line(nodePos[curNode].x,nodePos[curNode].y,nodePos[nextNode].x,nodePos[nextNode].y);
+              }
+              //line(goalPos.x,goalPos.y,nodePos[curPath.get(curPath.size()-1)].x,nodePos[curPath.get(curPath.size()-1)].y);
         }
-        //line(startPos.x,startPos.y,nodePos[curPath.get(0)].x,nodePos[curPath.get(0)].y);
-        
-        for (int i = curPathIndex == 0 ? 0:curPathIndex-1; i < curPath.size()-1; i++){
-          int curNode = curPath.get(i);
-          int nextNode = curPath.get(i+1);
-          line(nodePos[curNode].x,nodePos[curNode].y,nodePos[nextNode].x,nodePos[nextNode].y);
-        }
-        //line(goalPos.x,goalPos.y,nodePos[curPath.get(curPath.size()-1)].x,nodePos[curPath.get(curPath.size()-1)].y);
       }
+      
       
       
   }
@@ -238,7 +258,10 @@ void draw(){
   stroke(100,100,100);
   strokeWeight(1);
   fill(20,60,250);
-  circle(startPos.x,startPos.y,2*startAgentRadius);
+  for(int i = 0; i < numAgents; i++){
+      circle(agents[i].x,agents[i].y,2*startAgentRadius);
+  }
+  
   
   
   strokeWeight(1);
@@ -272,7 +295,7 @@ void keyPressed(){
   if (key == 'r'){
     if(!paused){
       testPRM();
-      curPathIndex = 0;
+      curPathIndex = new int[maxNumAgents];
       return;
     }
     
@@ -297,56 +320,57 @@ void keyPressed(){
     circlePos[0].y += speed;
   }
   if(!paused && !firstTimeSetup){
-    connectNeighbors(circlePos, circleRad, numObstacles, nodePos, numNodes,startPos,goalPos);
-    curPath = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes);
-    curPathIndex = 0;
+    connectNeighbors(circlePos, circleRad, numObstacles, nodePos, numNodes);
+    curPath = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes, numAgents);
+    curPathIndex = new int[maxNumAgents];;
   }
-  
-  //Collections.reverse(curPath);
 }
 
 void keyReleased(){
-  //camera.HandleKeyReleased();
   if (keyCode == SHIFT){
     shiftDown = false;
   }
 }
 
 void mousePressed(){
-  //camera.mousePressed();
   if(paused){
     if(mouseButton == LEFT){
        circlePos[numObstacles] = new Vec2(mouseX,mouseY);
        circleRad[numObstacles++] = (10+40*pow(random(1),3));
     }else{
-       startPos = new Vec2(mouseX,mouseY); 
+       
+       agents[numAgents%maxNumAgents] = new Vec2(mouseX,mouseY);
+       numAgents++;
+       if(numAgents > maxNumAgents){
+          numAgents = maxNumAgents; 
+       }
+       nodePos[numNodes + numAgents] = goalPos;
     }
   }
   else if (mouseButton == RIGHT){
-    startPos = new Vec2(mouseX, mouseY);
-    //println("New Start is",startPos.x, startPos.y);
+     int indextoPlace = numAgents%maxNumAgents;
+     agents[indextoPlace] = new Vec2(mouseX,mouseY);
+     nodePos[indextoPlace+numNodes] = agents[indextoPlace];
+     numAgents++;
+     if(numAgents > maxNumAgents){
+        numAgents = maxNumAgents; 
+     }
+     nodePos[numNodes + numAgents] = goalPos;
+     connectNeighbors(circlePos,circleRad,numObstacles,nodePos,numNodes);
+     ArrayList<Integer>[] tempPaths  = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes,numAgents);
+      for(int i = 0; i < tempPaths.length; i++){
+         curPath[i] = tempPaths[i]; 
+      }
+      curPathIndex = new int[maxNumAgents];
   }
   else{
     goalPos = new Vec2(mouseX, mouseY);
-    //println("New Goal is",goalPos.x, goalPos.y);
+    nodePos[numNodes + numAgents] = goalPos;
+    connectNeighbors(circlePos,circleRad,numObstacles,nodePos,numNodes);
+    ArrayList<Integer>[] tempPaths  = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes,numAgents);
+    for(int i = 0; i < tempPaths.length; i++){
+       curPath[i] = tempPaths[i]; 
+    }
+    curPathIndex = new int[maxNumAgents];
   }
-  if(!paused && !firstTimeSetup){
-      connectNeighbors(circlePos, circleRad, numObstacles, nodePos, numNodes,startPos,goalPos);
-      curPath = planPath(circlePos, circleRad, numObstacles, nodePos, numNodes);
-      curPathIndex = 0;
-  }
-  
-  //Collections.reverse(curPath);
-}
-
-void mouseReleased(){
-    //camera.mouseReleased(); 
-}
-
-void mouseDragged(){
-   //camera.mouseDragged(); 
-}
-
-void mouseWheel(MouseEvent event){
-  //camera.mouseWheel(event);
 }
