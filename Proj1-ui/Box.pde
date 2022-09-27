@@ -3,7 +3,7 @@ public class Box{
     float width;
     float height;
 
-    public main(Vec2 topleft, float w, float h){
+    public Box(Vec2 topleft, float w, float h){
         this.topLeft = topleft;
         this.width = w;
         this.height = h;

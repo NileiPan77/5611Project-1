@@ -2,11 +2,28 @@ public class Obstacles{
     public ArrayList<Circle> circles;
     public ArrayList<Box> boxes;
 
-    public main(ArrayList<Circle> c, ArrayList<Box> b){
+    public Obstacles(ArrayList<Circle> c, ArrayList<Box> b){
         this.circles = c;
         this.boxes = b;
     }
-
+    
+    public boolean pointInCircleList(Vec2 pointPos, float eps){
+      for (int i = 0; i < circles.size(); i++){
+        if(circles.get(i).pointInCircle(pointPos,eps)){
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    public boolean pointInBoxList(Vec2 pointPos){
+      for(int i = 0; i < boxes.size(); i++){
+         if(boxes.get(i).pointInBox(pointPos)){
+             return true;
+         }
+      }
+      return false;
+    }
     public hitInfo rayCircleListIntersect(Vec2 ray_start, Vec2 ray_dir, float max_t, float eps){
         hitInfo hit = new hitInfo();
         hit.t = max_t;
@@ -21,13 +38,14 @@ public class Obstacles{
                 hit.t = -1;
             }
         }
-        return hit
+        
+        return hit;
     }
     public hitInfo rayBoxesIntersect(Vec2 ray_start, Vec2 ray_dir, float max_t){
         hitInfo hit = new hitInfo();
         hit.t = max_t;
         for (int i = 0; i < this.boxes.size(); i++){
-            hitInfo boxHit = this.boxes.rayBoxIntersect(ray_start, ray_dir, hit.t);
+            hitInfo boxHit = this.boxes.get(i).rayBoxIntersect(ray_start, ray_dir, hit.t);
             if (boxHit.t > 0 && boxHit.t < hit.t){
                 hit.hit = true;
                 hit.t = boxHit.t;
@@ -37,9 +55,10 @@ public class Obstacles{
                 hit.t = -1;
             }
         }
+        
         return hit;
     }
-    public boolean rayObstacleIntersection(Vec2 ray_start, Vec2 ray_dir, float max_t, float eps){
+    public hitInfo rayObstacleIntersection(Vec2 ray_start, Vec2 ray_dir, float max_t, float eps){
         hitInfo hitCircles = this.rayCircleListIntersect(ray_start, ray_dir, max_t,eps);
         hitInfo hitBoxes = this.rayBoxesIntersect(ray_start, ray_dir, max_t);
         if(hitBoxes.hit && hitCircles.hit){

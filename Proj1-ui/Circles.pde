@@ -2,7 +2,7 @@ public class Circle{
     Vec2 center;
     float radius;
     
-    public main(Vec2 center, float r){
+    public Circle(Vec2 center, float r){
         this.center = center;
         this.radius = r;
     }
@@ -17,14 +17,15 @@ public class Circle{
     
     public hitInfo rayCircleIntersect(Vec2 l_start, Vec2 l_dir, float max_t, float eps){
         hitInfo hit = new hitInfo();
-        radius += eps+2;
+        float r = radius + eps;
+
         //Step 2: Compute W - a displacement vector pointing from the start of the line segment to the center of the circle
         Vec2 toCircle = this.center.minus(l_start);
         
         //Step 3: Solve quadratic equation for intersection point (in terms of l_dir and toCircle)
         float a = 1;  //Length of l_dir (we normalized it)
         float b = -2*dot(l_dir,toCircle); //-2*dot(l_dir,toCircle)
-        float c = toCircle.lengthSqr() - (this.radius + eps)*(this.radius + eps); //different of squared distances
+        float c = toCircle.lengthSqr() - (r + 2)*(r + 2); //different of squared distances
         
         float d = b*b - 4*a*c; //discriminant 
         
@@ -47,4 +48,5 @@ public class Circle{
         
         return hit;
     }
+    
 }
