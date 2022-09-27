@@ -51,6 +51,11 @@ int[] parent = new int[maxNumNodes]; //A list which stores the best previous nod
 int startAgentRadius = 10;
 int minDistance = 99999;
 float[] distanceToGoal = new float[maxNumNodes];
+boolean[] reach = new boolean[maxNumNodes];
+HashMap<Integer, Float> dist = new HashMap<Integer, Float>();
+HashMap<Integer, Integer> prev = new HashMap<Integer, Integer>();
+ArrayList<Integer> q = new ArrayList<Integer> ();
+int finalIndex = -1;
 
 //Set which nodes are connected to which neighbors (graph edges) based on PRM rules
 void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
@@ -68,6 +73,28 @@ void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] no
         tmp.y = distBetween;
         neighbors[i].add(tmp);
       }
+    }
+    reach[i] = false;
+  }
+
+  for(int i = 0; i < maxNumNodes; i++) {
+      dist.put(i, 999999.0);
+      prev.put(i, -1);
+      q.add(i);
+  }
+
+  for(int i = 0; i < numNodes; i++) {
+    Vec2 dir = nodePos[i].minus(startPos).normalized();
+    float distBetween = nodePos[i].distanceTo(startPos);
+    Vec2 dir2 = goalPos.minus(nodePos[i]).normalized();
+    float distBetween2 = nodePos[i].distanceTo(goalPos);
+    hitInfo circleListCheck = rayCircleListIntesect(centers, radii, startPos, dir, distBetween);
+    hitInfo circleListCheck2 = rayCircleListIntesect(centers, radii, nodePos[i], dir2, distBetween2);
+    if (!circleListCheck.hit){
+      dist.put(i, distBetween);
+    }
+    if (!circleListCheck2.hit) {
+      reach[i] = true;
     }
   }
 }
@@ -92,165 +119,76 @@ int closestNode(Vec2[] centers, float[] radii, Vec2 point, Vec2[] nodePos, int n
 ArrayList<Integer> planPath(Vec2 startPos, Vec2 goalPos, Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
   ArrayList<Integer> path = new ArrayList();
   
-  int startID = closestNode(centers, radii, startPos, nodePos, numNodes);
-  int goalID = closestNode(centers, radii, goalPos, nodePos, numNodes);
-
-  // Vec2 dir = startPos.minus(goalPos).normalized();
-  // float distBetween = startPos.distanceTo(goalPos);
-  // hitInfo circleListCheck = rayCircleListIntesect(centers, radii, startPos, dir, distBetween);
-  // if(!circleListCheck.hit) {
-  //   path.add(startID);
-  //   path.add(goalID);
-  //   return path;
-  // }
-  
-  if(startID != -1 && goalID != -1) {
-    path = runBFS(nodePos, numNodes, startID, goalID);
+  Vec2 dir = startPos.minus(goalPos).normalized();
+  float distBetween = goalPos.distanceTo(startPos);
+  hitInfo circleListCheck = rayCircleListIntesect(centers, radii, goalPos, dir, distBetween);
+  if(!circleListCheck.hit) {
+    return path;
   }
+  
+  path = runBFS(nodePos, numNodes, centers, radii);
+  
   
   return path;
 }
 
 //BFS (Breadth First Search)
-HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, int startID, int goalID) {
-  long startTime, endTime, startTime1, endTime1, startTime2, endTime2;
-  boolean[] ifCheck = new boolean[maxNumNodes];
-  HashMap<Integer, Float> dist = new HashMap<Integer, Float>();
-  HashMap<Integer, Integer> prev = new HashMap<Integer, Integer>();
-  ArrayList<Integer> q = new ArrayList<Integer> ();
-  for(int i = 0; i < maxNumNodes; i++) {
-      dist.put(i, 999999.0);
-      prev.put(i, -1);
-      q.add(i);
-  }
-
-  dist.put(startID, 0.0);
-
-  //startTime = System.nanoTime();
+HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, Vec2[] centers, float[] radii) {
+  long startTime, endTime;
+  
   while(q.size() != 0) {
       float min = 99999;
       int index = -1;
       int ind = -1;
-      //startTime1 = System.nanoTime();
+      startTime = System.nanoTime();
       for(int i = 0; i < q.size(); i++) {
-          //println("q.get()", q.get(i), " dist: " , dist.get(q.get(i)));
           if(min > dist.get(q.get(i))+distanceToGoal[q.get(i)]) {
             min = dist.get(q.get(i))+distanceToGoal[q.get(i)];
             index = q.get(i);
             ind = i;
           }
       }
-      //endTime1 = System.nanoTime();
-      //println("22222: ", " Time (us):", int((endTime1-startTime1)/1000));
       if(index == -1) {
-        //println(prev);
         return prev;
       }
-      
-      //println("min:" , min, " index: ", index, " startID: ", startID, " dist: " , dist.get(startID), " size: ", q.size(), "   ",ind);
+      endTime = System.nanoTime();
+      println(" Time (us):", int((endTime-startTime)/1000));
       q.remove(ind);
-      //startTime2 = System.nanoTime();
+      
       for(int j = 0; j < neighbors[index].size(); j++) {
           float alt = dist.get(index) + neighbors[index].get(j).y;
           if(alt < dist.get(neighbors[index].get(j).x)) {
               dist.put(neighbors[index].get(j).x, alt);
               prev.put(neighbors[index].get(j).x, index);
           }
-          
       }
-      //endTime2 = System.nanoTime();
-      //println("33333: ", " Time (us):", int((endTime2-startTime2)/1000));
-      if(index == goalID) {
-        break;
-      }
-      
+    
+    if(reach[index]) {
+      println("code goes here"); 
+      finalIndex = index;
+      return prev;
+    }
   }
-  //endTime = System.nanoTime();
-  //println("11111: ", " Time (us):", int((endTime-startTime)/1000));
-  //println(prev);
+    
   
   return prev;
 }
 
-ArrayList<Integer> runBFS(Vec2[] nodePos, int numNodes, int startID, int goalID) {
-  long startTime, endTime;
-  HashMap<Integer, Integer> prev = dijkstra(neighbors, startID, goalID);
-  int next = prev.get(goalID);
+ArrayList<Integer> runBFS(Vec2[] nodePos, int numNodes, Vec2[] centers, float[] radii) {
+  HashMap<Integer, Integer> prev = dijkstra(neighbors, centers, radii);
+  int next = prev.get(finalIndex);
   ArrayList<Integer> path = new ArrayList<Integer>();
+  if(finalIndex == -1) {
+    return path;
+  }
   ArrayList<Integer> pathTmp = new ArrayList<Integer>();
-  pathTmp.add(goalID);
-  //println("start: ", startID, " goal: ", goalID);
-  startTime = System.nanoTime();
-  while(next != startID) {
-    if(next == -1) {
-      return path;
-    }
+  pathTmp.add(finalIndex);
+  while(next != -1) {
     pathTmp.add(next);
-    //println("next", next, " goal ", prev.get(goalID));
     next = prev.get(next);
   }
-  pathTmp.add(startID);
   for(int i = pathTmp.size()-1; i >= 0; i--) {
     path.add(pathTmp.get(i));
   }
-  endTime = System.nanoTime();
-  //println("44444: ", " Time (us):", int((endTime-startTime)/1000));
   return path;
 }
-
-
-
-
-// ArrayList<Integer> runBFS(Vec2[] nodePos, int numNodes, int startID, int goalID){
-//   ArrayList<Integer> fringe = new ArrayList();  //New empty fringe
-//   ArrayList<Integer> path = new ArrayList();
-//   for (int i = 0; i < numNodes; i++) { //Clear visit tags and parent pointers
-//     visited[i] = false;
-//     parent[i] = -1; //No parent yet
-//   }
-
-//   //println("\nBeginning Search");
-  
-//   visited[startID] = true;
-//   fringe.add(startID);
-//   //println("Adding node", startID, "(start) to the fringe.");
-//   //println(" Current Fringe: ", fringe);
-  
-//   while (fringe.size() > 0){
-//     int currentNode = fringe.get(0);
-//     fringe.remove(0);
-//     if (currentNode == goalID){
-//       //println("Goal found!");
-//       break;
-//     }
-//     for (int i = 0; i < neighbors[currentNode].size(); i++){
-//       int neighborNode = neighbors[currentNode].get(i);
-//       if (!visited[neighborNode]){
-//         visited[neighborNode] = true;
-//         parent[neighborNode] = currentNode;
-//         fringe.add(neighborNode);
-//         //println("Added node", neighborNode, "to the fringe.");
-//         //println(" Current Fringe: ", fringe);
-//       }
-//     } 
-//   }
-  
-//   if (fringe.size() == 0){
-//     //println("No Path");
-//     path.add(0,-1);
-//     return path;
-//   }
-    
-//   //print("\nReverse path: ");
-//   int prevNode = parent[goalID];
-//   path.add(0,goalID);
-//   //print(goalID, " ");
-//   while (prevNode >= 0){
-//     //print(prevNode," ");
-//     path.add(0,prevNode);
-//     prevNode = parent[prevNode];
-//   }
-//   //print("\n");
-  
-//   return path;
-// }

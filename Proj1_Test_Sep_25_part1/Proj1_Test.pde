@@ -185,7 +185,7 @@ void draw(){
   stroke(20,255,40);
   strokeWeight(5);
   if (curPath.size() == 0){
-    //line(startPos.x,startPos.y,goalPos.x,goalPos.y);
+    line(startPos.x,startPos.y,goalPos.x,goalPos.y);
     return;
   }
   line(startPos.x,startPos.y,nodePos[curPath.get(0)].x,nodePos[curPath.get(0)].y);
