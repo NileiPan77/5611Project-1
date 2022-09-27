@@ -24,7 +24,7 @@ float circleRad[] = new float[maxNumObstacles];  //Circle radii
 
 
 
-
+Obstacles allObstacles = new Obstacles();
 
 Vec2 startPos = new Vec2(100,500);
 Vec2 goalPos = new Vec2(500,200);
@@ -54,11 +54,6 @@ void generateRandomNodes(int numNodes, Vec2[] circleCenters, float[] circleRadii
 }
 
 void placeRandomObstacles(int numObstacles){
-  //Initial obstacle position
-  //for (int i = 0; i < numObstacles; i++){
-  //  circlePos[i] = new Vec2(random(50,950),random(50,700));
-  //  circleRad[i] = (10+40*pow(random(1),3));
-  //}
   circleRad[0] = 30; //Make the first obstacle big
   numObstacles = 1;
 }
@@ -73,75 +68,11 @@ void setup(){
   circleRad[0] = 30;
   numObstacles = 1;
   testPRM();
-  //camera = new Camera();
-  //camera.position = new PVector(0,0,25);
-  //noStroke();
-  
-  //// Set the blending mode to BLEND (this is standard "alpha blending").
-  //blendMode(BLEND);
-  
-  //// Enable depth sorting.
-  //// NOTE: In Processing, you must enable depth sorting manually since it's considered an expensive operation.
-  //hint(ENABLE_DEPTH_SORT);
 }
 
 int numCollisions;
 float pathLength;
 boolean reachedGoal;
-
-//void pathQuality(){
-//  Vec2 dir;
-//  hitInfo hit;
-//  float segmentLength;
-//  numCollisions = 9999; pathLength = 9999;
-//  if (curPath.size() == 1 && curPath.get(0) == -1) return; //No path found  
-  
-//  pathLength = 0; numCollisions = 0;
-  
-//  if (curPath.size() == 0 ){ //Path found with no nodes (direct start-to-goal path)
-//    segmentLength = startPos.distanceTo(goalPos);
-//    pathLength += segmentLength;
-//    dir = goalPos.minus(startPos).normalized();
-//    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
-//    if (hit.hit) numCollisions += 1;
-//    return;
-//  }
-  
-//  segmentLength = startPos.distanceTo(nodePos[curPath.get(0)]);
-//  pathLength += segmentLength;
-//  dir = nodePos[curPath.get(0)].minus(startPos).normalized();
-//  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength, startAgentRadius);
-//  if (hit.hit) numCollisions += 1;
-  
-  
-//  for (int i = 0; i < curPath.size()-1; i++){
-//    int curNode = curPath.get(i);
-//    int nextNode = curPath.get(i+1);
-//    segmentLength = nodePos[curNode].distanceTo(nodePos[nextNode]);
-//    pathLength += segmentLength;
-    
-//    dir = nodePos[nextNode].minus(nodePos[curNode]).normalized();
-//    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[curNode], dir, segmentLength, startAgentRadius);
-//    if (hit.hit) numCollisions += 1;
-//  }
-  
-//  int lastNode = curPath.get(curPath.size()-1);
-//  segmentLength = nodePos[lastNode].distanceTo(goalPos);
-//  pathLength += segmentLength;
-//  dir = goalPos.minus(nodePos[lastNode]).normalized();
-//  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[lastNode], dir, segmentLength, startAgentRadius);
-//  if (hit.hit) numCollisions += 1;
-//}
-
-Vec2 sampleFreePos(){
-  Vec2 randPos = new Vec2(random(width),random(height));
-  boolean insideAnyCircle = pointInCircleList(circlePos,circleRad,numObstacles,randPos,2);
-  while (insideAnyCircle){
-    randPos = new Vec2(random(width),random(height));
-    insideAnyCircle = pointInCircleList(circlePos,circleRad,numObstacles,randPos,2);
-  }
-  return randPos;
-}
 
 void testPRM(){
   
