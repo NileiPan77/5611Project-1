@@ -40,6 +40,7 @@
 public class Pair {
   public int x;
   public float y;
+  public float distanceToGoal;
 }
 
 //Here, we represent our graph structure as a neighbor list
@@ -49,14 +50,11 @@ ArrayList<Pair>[] neighbors = new ArrayList[maxNumNodes];   //A list of neighbor
 Boolean[] visited = new Boolean[maxNumNodes]; //A list which store if a given node has been visited
 int[] parent = new int[maxNumNodes]; //A list which stores the best previous node on the optimal path to reach this node
 int startAgentRadius = 10;
-int minDistance = 99999;
-float[] distanceToGoal = new float[maxNumNodes];
 
 //Set which nodes are connected to which neighbors (graph edges) based on PRM rules
 void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
   for (int i = 0; i < numNodes; i++){
     neighbors[i] = new ArrayList<Pair>();  //Clear neighbors list
-    distanceToGoal[i] = nodePos[i].distanceTo(goalPos);
     for (int j = 0; j < numNodes; j++){
       if (i == j) continue; //don't connect to myself 
       Vec2 dir = nodePos[j].minus(nodePos[i]).normalized();
@@ -66,6 +64,7 @@ void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] no
         Pair tmp = new Pair();
         tmp.x = j;
         tmp.y = distBetween;
+        tmp.distanceToGoal = nodePos[j].distanceTo(goalPos);
         neighbors[i].add(tmp);
       }
     }
@@ -126,21 +125,21 @@ HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, int startID, int
 
   dist.put(startID, 0.0);
 
-  //startTime = System.nanoTime();
+  startTime = System.nanoTime();
   while(q.size() != 0) {
       float min = 99999;
       int index = -1;
       int ind = -1;
-      //startTime1 = System.nanoTime();
+      startTime1 = System.nanoTime();
       for(int i = 0; i < q.size(); i++) {
           //println("q.get()", q.get(i), " dist: " , dist.get(q.get(i)));
-          if(min > dist.get(q.get(i))+distanceToGoal[q.get(i)]) {
-            min = dist.get(q.get(i))+distanceToGoal[q.get(i)];
-            index = q.get(i);
-            ind = i;
+          if(min > dist.get(q.get(i))) {
+              min = dist.get(q.get(i));
+              index = q.get(i);
+              ind = i;
           }
       }
-      //endTime1 = System.nanoTime();
+      endTime1 = System.nanoTime();
       //println("22222: ", " Time (us):", int((endTime1-startTime1)/1000));
       if(index == -1) {
         //println(prev);
@@ -149,24 +148,23 @@ HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, int startID, int
       
       //println("min:" , min, " index: ", index, " startID: ", startID, " dist: " , dist.get(startID), " size: ", q.size(), "   ",ind);
       q.remove(ind);
-      //startTime2 = System.nanoTime();
+      startTime2 = System.nanoTime();
       for(int j = 0; j < neighbors[index].size(); j++) {
-          float alt = dist.get(index) + neighbors[index].get(j).y;
+          float alt = min + neighbors[index].get(j).y+neighbors[index].get(j).distanceToGoal;
           if(alt < dist.get(neighbors[index].get(j).x)) {
               dist.put(neighbors[index].get(j).x, alt);
               prev.put(neighbors[index].get(j).x, index);
           }
-          
       }
-      //endTime2 = System.nanoTime();
+      endTime2 = System.nanoTime();
       //println("33333: ", " Time (us):", int((endTime2-startTime2)/1000));
       if(index == goalID) {
         break;
       }
       
   }
-  //endTime = System.nanoTime();
-  //println("11111: ", " Time (us):", int((endTime-startTime)/1000));
+  endTime = System.nanoTime();
+  println("11111: ", " Time (us):", int((endTime-startTime)/1000));
   //println(prev);
   
   return prev;
@@ -194,7 +192,7 @@ ArrayList<Integer> runBFS(Vec2[] nodePos, int numNodes, int startID, int goalID)
     path.add(pathTmp.get(i));
   }
   endTime = System.nanoTime();
-  //println("44444: ", " Time (us):", int((endTime-startTime)/1000));
+  println("44444: ", " Time (us):", int((endTime-startTime)/1000));
   return path;
 }
 
