@@ -37,14 +37,16 @@
 // intended to illustrate the basic set-up for the assignmtent, don't assume 
 // this example funcationality is correct and end up copying it's mistakes!).
 
-public class Pair {
-  public int x;
-  public float y;
-}
+// public class Pair {
+//   public int x;
+//   public float y;
+// }
 
 //Here, we represent our graph structure as a neighbor list
 //You can use any graph representation you like
-ArrayList<Pair>[] neighbors = new ArrayList[maxNumNodes];   //A list of neighbors can can be reached from a given node
+//ArrayList<Pair>[] neighbors = new ArrayList[maxNumNodes];   //A list of neighbors can can be reached from a given node
+ArrayList<Integer>[] neighbors = new ArrayList[maxNumNodes];
+ArrayList<Float>[] distBetweenNeighbors = new  ArrayList[maxNumNodes];
 //We also want some help arrays to keep track of some information about nodes we've visited
 int[] parent = new int[maxNumNodes]; //A list which stores the best previous node on the optimal path to reach this node
 int startAgentRadius = 10;
@@ -60,18 +62,18 @@ int finalIndex = -1;
 //Set which nodes are connected to which neighbors (graph edges) based on PRM rules
 void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
   for (int i = 0; i < numNodes; i++){
-    neighbors[i] = new ArrayList<Pair>();  //Clear neighbors list
+    neighbors[i] = new ArrayList<Integer>();  //Clear neighbors list
+    distBetweenNeighbors[i] = new ArrayList<Float>();
     distanceToGoal[i] = nodePos[i].distanceTo(goalPos);
     for (int j = 0; j < numNodes; j++){
       if (i == j) continue; //don't connect to myself 
       Vec2 dir = nodePos[j].minus(nodePos[i]).normalized();
       float distBetween = nodePos[i].distanceTo(nodePos[j]);
-      hitInfo circleListCheck = rayCircleListIntesect(centers, radii, nodePos[i], dir, distBetween);
+      hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir, distBetween);
       if (!circleListCheck.hit){
-        Pair tmp = new Pair();
-        tmp.x = j;
-        tmp.y = distBetween;
-        neighbors[i].add(tmp);
+        neighbors[i].add(j);
+        distBetween = nodePos[i].distanceTo(nodePos[j]);
+        distBetweenNeighbors[i].add(distBetween);
       }
     }
     reach[i] = false;
@@ -88,8 +90,8 @@ void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] no
     float distBetween = nodePos[i].distanceTo(startPos);
     Vec2 dir2 = goalPos.minus(nodePos[i]).normalized();
     float distBetween2 = nodePos[i].distanceTo(goalPos);
-    hitInfo circleListCheck = rayCircleListIntesect(centers, radii, startPos, dir, distBetween);
-    hitInfo circleListCheck2 = rayCircleListIntesect(centers, radii, nodePos[i], dir2, distBetween2);
+    hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, startPos, dir, distBetween);
+    hitInfo circleListCheck2 = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir2, distBetween2);
     if (!circleListCheck.hit){
       dist.put(i, distBetween);
       q.add(i);
@@ -108,7 +110,7 @@ int closestNode(Vec2[] centers, float[] radii, Vec2 point, Vec2[] nodePos, int n
     float dist = nodePos[i].distanceTo(point);
     Vec2 dir = point.minus(nodePos[i]).normalized();
     float distBetween = nodePos[i].distanceTo(point);
-    hitInfo circleListCheck = rayCircleListIntesect(centers, radii, nodePos[i], dir, distBetween);
+    hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir, distBetween);
     if (dist < minDist && !circleListCheck.hit){
       closestID = i;
       minDist = dist;
@@ -122,7 +124,7 @@ ArrayList<Integer> planPath(Vec2 startPos, Vec2 goalPos, Vec2[] centers, float[]
   
   Vec2 dir = startPos.minus(goalPos).normalized();
   float distBetween = goalPos.distanceTo(startPos);
-  hitInfo circleListCheck = rayCircleListIntesect(centers, radii, goalPos, dir, distBetween);
+  hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, goalPos, dir, distBetween);
   if(!circleListCheck.hit) {
     return path;
   }
@@ -134,7 +136,7 @@ ArrayList<Integer> planPath(Vec2 startPos, Vec2 goalPos, Vec2[] centers, float[]
 }
 
 //BFS (Breadth First Search)
-HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, Vec2[] centers, float[] radii) {
+HashMap<Integer, Integer> dijkstra(ArrayList<Integer>[] neighbors, Vec2[] centers, float[] radii) {
   long startTime, endTime;
   
   while(q.size() != 0) {
@@ -160,17 +162,17 @@ HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, Vec2[] centers, 
       visited[index] = true;
       
       for(int j = 0; j < neighbors[index].size(); j++) {
-        boolean isVisited = visited[neighbors[index].get(j).x];
-        boolean isContain = q.contains(neighbors[index].get(j).x);
+        boolean isVisited = visited[neighbors[index].get(j)];
+        boolean isContain = q.contains(neighbors[index].get(j));
         if(!isVisited && !isContain) {
           //println("visited: ", visited[j], " index: ", index);
-          q.add(neighbors[index].get(j).x);
+          q.add(neighbors[index].get(j));
         }
         
-        float alt = dist.get(index) + neighbors[index].get(j).y;
-        if(alt < dist.get(neighbors[index].get(j).x)) {
-            dist.put(neighbors[index].get(j).x, alt);
-            prev.put(neighbors[index].get(j).x, index);
+        float alt = dist.get(index) + distBetweenNeighbors[index].get(j);
+        if(alt < dist.get(neighbors[index].get(j))) {
+            dist.put(neighbors[index].get(j), alt);
+            prev.put(neighbors[index].get(j), index);
         }
       }
     
@@ -202,4 +204,88 @@ ArrayList<Integer> runBFS(Vec2[] nodePos, int numNodes, Vec2[] centers, float[] 
     path.add(pathTmp.get(i));
   }
   return path;
+}
+
+//Compute collision tests. Code from the in-class exercises may be helpful ehre.
+
+//Returns true if the point is inside a circle
+//You must consider a point as colliding if it's distance is <= eps
+boolean pointInCircle(Vec2 center, float r, Vec2 pointPos, float eps){
+  float dist = pointPos.distanceTo(center);
+  if (dist < r+eps){
+    return true;
+  }
+  return false;
+}
+
+//Returns true if the point is inside a list of circle
+//You must consider a point as colliding if it's distance is <= eps
+boolean pointInCircleList(Vec2[] centers, float[] radii, int numObstacles, Vec2 pointPos, float eps){
+  for (int i = 0; i < numObstacles; i++){
+    Vec2 center =  centers[i];
+    float r = radii[i];
+    if(pointInCircle(center,r,pointPos,eps)){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+class hitInfo{
+  public boolean hit = false;
+  public float t = 9999999;
+}
+
+hitInfo rayCircleIntesect(Vec2 center, float r, Vec2 l_start, Vec2 l_dir, float max_t){
+  hitInfo hit = new hitInfo();
+  
+  //Step 2: Compute W - a displacement vector pointing from the start of the line segment to the center of the circle
+    Vec2 toCircle = center.minus(l_start);
+    
+    //Step 3: Solve quadratic equation for intersection point (in terms of l_dir and toCircle)
+    float a = 1;  //Length of l_dir (we normalized it)
+    float b = -2*dot(l_dir,toCircle); //-2*dot(l_dir,toCircle)
+    float c = toCircle.lengthSqr() - (r+strokeWidth)*(r+strokeWidth); //different of squared distances
+    
+    float d = b*b - 4*a*c; //discriminant 
+    
+    if (d >=0 ){ 
+      //If d is positive we know the line is colliding, but we need to check if the collision line within the line segment
+      //  ... this means t will be between 0 and the length of the line segment
+      float t1 = (-b - sqrt(d))/(2*a); //Optimization: we only need the first collision
+      float t2 = (-b + sqrt(d))/(2*a); //Optimization: we only need the first collision
+      //println(hit.t,t1,t2);
+      if (t1 > 0 && t1 < max_t){
+        hit.hit = true;
+        hit.t = t1;
+      }
+      else if (t1 < 0 && t2 > 0){
+        hit.hit = true;
+        hit.t = -1;
+      }
+      
+    }
+    
+  return hit;
+}
+
+hitInfo rayCircleListIntersect(Vec2[] centers, float[] radii, int numObstacles, Vec2 l_start, Vec2 l_dir, float max_t){
+  hitInfo hit = new hitInfo();
+  hit.t = max_t;
+  for (int i = 0; i < numObstacles; i++){
+    Vec2 center = centers[i];
+    float r = radii[i];
+    
+    hitInfo circleHit = rayCircleIntesect(center, r, l_start, l_dir, hit.t);
+    if (circleHit.t > 0 && circleHit.t < hit.t){
+      hit.hit = true;
+      hit.t = circleHit.t;
+    }
+    else if (circleHit.hit && circleHit.t < 0){
+      hit.hit = true;
+      hit.t = -1;
+    }
+  }
+  return hit;
 }

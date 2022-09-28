@@ -16,7 +16,6 @@ int numNodes  = 100;
   
   
 //A list of circle obstacles
-
 static int maxNumObstacles = 1000;
 Vec2 circlePos[] = new Vec2[maxNumObstacles]; //Circle positions
 float circleRad[] = new float[maxNumObstacles];  //Circle radii
@@ -75,7 +74,7 @@ void pathQuality(){
     segmentLength = startPos.distanceTo(goalPos);
     pathLength += segmentLength;
     dir = goalPos.minus(startPos).normalized();
-    hit = rayCircleListIntesect(circlePos, circleRad, startPos, dir, segmentLength);
+    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength);
     if (hit.hit) numCollisions += 1;
     return;
   }
@@ -83,7 +82,7 @@ void pathQuality(){
   segmentLength = startPos.distanceTo(nodePos[curPath.get(0)]);
   pathLength += segmentLength;
   dir = nodePos[curPath.get(0)].minus(startPos).normalized();
-  hit = rayCircleListIntesect(circlePos, circleRad, startPos, dir, segmentLength);
+  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, startPos, dir, segmentLength);
   if (hit.hit) numCollisions += 1;
   
   
@@ -94,7 +93,7 @@ void pathQuality(){
     pathLength += segmentLength;
     
     dir = nodePos[nextNode].minus(nodePos[curNode]).normalized();
-    hit = rayCircleListIntesect(circlePos, circleRad, nodePos[curNode], dir, segmentLength);
+    hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[curNode], dir, segmentLength);
     if (hit.hit) numCollisions += 1;
   }
   
@@ -102,7 +101,7 @@ void pathQuality(){
   segmentLength = nodePos[lastNode].distanceTo(goalPos);
   pathLength += segmentLength;
   dir = goalPos.minus(nodePos[lastNode]).normalized();
-  hit = rayCircleListIntesect(circlePos, circleRad, nodePos[lastNode], dir, segmentLength);
+  hit = rayCircleListIntersect(circlePos, circleRad, numObstacles, nodePos[lastNode], dir, segmentLength);
   if (hit.hit) numCollisions += 1;
 }
 
@@ -166,8 +165,8 @@ void draw(){
   stroke(100,100,100);
   strokeWeight(1);
   for (int i = 0; i < numNodes; i++){
-    for (int j = 0; j < neighbors[i].size(); j++){
-      line(nodePos[i].x,nodePos[i].y,nodePos[neighbors[i].get(j).x].x,nodePos[neighbors[i].get(j).x].y);
+    for (int j : neighbors[i]){
+      line(nodePos[i].x,nodePos[i].y,nodePos[j].x,nodePos[j].y);
     }
   }
   
