@@ -48,7 +48,7 @@ Boolean[] visited = new Boolean[maxNumNodes]; //A list which store if a given no
 int[] parent = new int[maxNumNodes]; //A list which stores the best previous node on the optimal path to reach this node
 float[][] distanceLookup = new float[maxNumNodes][maxNumNodes];
 float[] distanceToGoal = new float[maxNumNodes];
-float weighted = 1.5;
+float weighted = 1.3;
 
 //Set which nodes are connected to which neighbors (graph edges) based on PRM rules
 void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
