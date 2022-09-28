@@ -48,6 +48,7 @@ Boolean[] visited = new Boolean[maxNumNodes]; //A list which store if a given no
 int[] parent = new int[maxNumNodes]; //A list which stores the best previous node on the optimal path to reach this node
 float[][] distanceLookup = new float[maxNumNodes][maxNumNodes];
 float[] distanceToGoal = new float[maxNumNodes];
+float weighted = 1.5;
 
 //Set which nodes are connected to which neighbors (graph edges) based on PRM rules
 void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
@@ -133,7 +134,7 @@ ArrayList<Integer> dijkstra(Vec2[] nodePos, int numNodes, int startID, int goalI
      for(int i = 0; i < neighbors[min.index].size(); i++){
          int neighborIndex = neighbors[min.index].get(i);
          if(!visited[neighborIndex]){
-             float tempDist = distance[min.index] + distanceLookup[min.index][neighborIndex] + distanceToGoal[neighborIndex];
+             float tempDist = distance[min.index] + distanceLookup[min.index][neighborIndex] + weighted * distanceToGoal[neighborIndex];
              if(tempDist < distance[neighborIndex]){
                 distance[neighborIndex] = tempDist;
                 parent[neighborIndex] = min.index;
