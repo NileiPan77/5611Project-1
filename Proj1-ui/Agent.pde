@@ -79,6 +79,7 @@ public class Agent{
     public float computeTTC(Vec2 pos2, Vec2 vel2, float radius2){
         return this.rayCircleIntersectTime(pos2,radius2+this.radius,this.pos,this.vel.minus(vel2));
     }
+    
     public void computeAgentForces(ArrayList<Agent> agents){
         Vec2 goal_vel = this.path.get(this.pathIndex).minus(this.pos);
         Vec2 goal_acc = goal_vel.minus(this.vel).times(k_goal);

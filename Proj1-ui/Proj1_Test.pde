@@ -59,12 +59,12 @@ Vec2 sampleFreePos(){
 }
 
 int strokeWidth = 2;
-void setup(){
-  size(1024,768);
-  agentList = new ArrayList<>();
-  allObstacles.circles.add(new Circle(new Vec2(100,100),30));
-  testPRM();
-}
+// void setup(){
+//   size(1024,768);
+//   agentList = new ArrayList<>();
+//   allObstacles.circles.add(new Circle(new Vec2(100,100),30));
+//   testPRM();
+// }
 
 
 void testPRM(){
@@ -114,146 +114,146 @@ Vec2 agentDir;
 //   }
 //}
 
-void draw(){
+// void draw(){
   
-  background(200); //Grey background
-  strokeWeight(1);
-  stroke(0,0,0);
-  fill(255,255,255);
+//   background(200); //Grey background
+//   strokeWeight(1);
+//   stroke(0,0,0);
+//   fill(255,255,255);
   
   
-  if(!paused){
+//   if(!paused){
     
-    if(firstTimeSetup){
-      testPRM();
-      firstTimeSetup = false;
-    }
+//     if(firstTimeSetup){
+//       testPRM();
+//       firstTimeSetup = false;
+//     }
     
-    for(int i = 0; i < agentList.size(); i++){
-        agentList.get(i).update(1/frameRate);
-    }
+//     for(int i = 0; i < agentList.size(); i++){
+//         agentList.get(i).update(1/frameRate);
+//     }
     
     
-    //Draw PRM Nodes
-    fill(0);
-    for (int i = 0; i < numNodes; i++){
-      circle(nodePos[i].x,nodePos[i].y,5);
-    }
-    //Draw graph
-      stroke(100,100,100);
-      strokeWeight(1);
-      for (int i = 0; i < numNodes; i++){
-        for (int j : neighbors[i]){
-          line(nodePos[i].x,nodePos[i].y,nodePos[j].x,nodePos[j].y);
-        }
-      }
+//     //Draw PRM Nodes
+//     fill(0);
+//     for (int i = 0; i < numNodes; i++){
+//       circle(nodePos[i].x,nodePos[i].y,5);
+//     }
+//     //Draw graph
+//       stroke(100,100,100);
+//       strokeWeight(1);
+//       for (int i = 0; i < numNodes; i++){
+//         for (int j : neighbors[i]){
+//           line(nodePos[i].x,nodePos[i].y,nodePos[j].x,nodePos[j].y);
+//         }
+//       }
       
       
-      fill(250,30,50);
-      for(int i = 0; i < agentList.size(); i++){
-          circle(agentList.get(i).goal.x,agentList.get(i).goal.y,2*agentList.get(i).radius);
-      }
+//       fill(250,30,50);
+//       for(int i = 0; i < agentList.size(); i++){
+//           circle(agentList.get(i).goal.x,agentList.get(i).goal.y,2*agentList.get(i).radius);
+//       }
       
       
       
       
-  }
+//   }
    
-  //Draw Start and Goal
-  stroke(100,100,100);
-  strokeWeight(1);
-  fill(20,60,250);
-  for(int i = 0; i < agentList.size(); i++){
-      circle(agentList.get(i).pos.x,agentList.get(i).pos.y,2*agentList.get(i).radius);
-  }
+//   //Draw Start and Goal
+//   stroke(100,100,100);
+//   strokeWeight(1);
+//   fill(20,60,250);
+//   for(int i = 0; i < agentList.size(); i++){
+//       circle(agentList.get(i).pos.x,agentList.get(i).pos.y,2*agentList.get(i).radius);
+//   }
   
   
   
-  strokeWeight(1);
-  stroke(0,0,0);
-  fill(255,255,255);
-  //Draw the circle obstacles
-  for (int i = 0; i < allObstacles.circles.size(); i++){
-    Vec2 c = allObstacles.circles.get(i).center;
-    float r = allObstacles.circles.get(i).radius;
-    circle(c.x,c.y,r*2);
-  }
-  ////Draw the first circle a little special b/c the user controls it
-  //fill(240);
-  //strokeWeight(2);
-  //circle(allObstacles.circles.get(0).center.x,allObstacles.circles.get(0).center.y,allObstacles.circles.get(0).radius*2);
-  //strokeWeight(1);
+//   strokeWeight(1);
+//   stroke(0,0,0);
+//   fill(255,255,255);
+//   //Draw the circle obstacles
+//   for (int i = 0; i < allObstacles.circles.size(); i++){
+//     Vec2 c = allObstacles.circles.get(i).center;
+//     float r = allObstacles.circles.get(i).radius;
+//     circle(c.x,c.y,r*2);
+//   }
+//   ////Draw the first circle a little special b/c the user controls it
+//   //fill(240);
+//   //strokeWeight(2);
+//   //circle(allObstacles.circles.get(0).center.x,allObstacles.circles.get(0).center.y,allObstacles.circles.get(0).radius*2);
+//   //strokeWeight(1);
   
   
   
   
   
-}
+// }
 
 
-boolean shiftDown = false;
-void keyPressed(){
-  //camera.HandleKeyPressed();
-  if(key == ' '){
-    paused = !paused;
-  }
-  if (key == 'r'){
-    if(!paused){
-      testPRM();
-      return;
-    }
+// boolean shiftDown = false;
+// void keyPressed(){
+//   //camera.HandleKeyPressed();
+//   if(key == ' '){
+//     paused = !paused;
+//   }
+//   if (key == 'r'){
+//     if(!paused){
+//       testPRM();
+//       return;
+//     }
     
-  }
+//   }
   
-  if (keyCode == SHIFT){
-    shiftDown = true;
-  }
+//   if (keyCode == SHIFT){
+//     shiftDown = true;
+//   }
   
-  float speed = 10;
-  if (shiftDown) speed = 30;
-  if (keyCode == RIGHT){
-    allObstacles.circles.get(0).center.x += speed;
-  }
-  if (keyCode == LEFT){
-    allObstacles.circles.get(0).center.x -= speed;
-  }
-  if (keyCode == UP){
-    allObstacles.circles.get(0).center.y -= speed;
-  }
-  if (keyCode == DOWN){
-    allObstacles.circles.get(0).center.y += speed;
-  }
-  if(!paused && !firstTimeSetup){
-    connectNeighbors(nodePos, numNodes);
-    planPath(numNodes);
-  }
-}
+//   float speed = 10;
+//   if (shiftDown) speed = 30;
+//   if (keyCode == RIGHT){
+//     allObstacles.circles.get(0).center.x += speed;
+//   }
+//   if (keyCode == LEFT){
+//     allObstacles.circles.get(0).center.x -= speed;
+//   }
+//   if (keyCode == UP){
+//     allObstacles.circles.get(0).center.y -= speed;
+//   }
+//   if (keyCode == DOWN){
+//     allObstacles.circles.get(0).center.y += speed;
+//   }
+//   if(!paused && !firstTimeSetup){
+//     connectNeighbors(nodePos, numNodes);
+//     planPath(numNodes);
+//   }
+// }
 
-void keyReleased(){
-  if (keyCode == SHIFT){
-    shiftDown = false;
-  }
-}
+// void keyReleased(){
+//   if (keyCode == SHIFT){
+//     shiftDown = false;
+//   }
+// }
 
-void mousePressed(){
-  if(paused){
-    if(mouseButton == LEFT){
-         allObstacles.circles.add(new Circle(new Vec2(mouseX,mouseY),(10+40*pow(random(1),3))));
-    }else{
-         int id = agentList.size();
-         if(agentList.size() < maxNumAgents){
-             agentList.add(new Agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
-         }
-    }
-  }
-  else if (mouseButton == RIGHT){
-     int id = agentList.size();
-     if(agentList.size() < maxNumAgents){
-        agentList.add(new Agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
-        agentList.get(id).goal = sampleFreePos();
-        connectNeighbors(nodePos,numNodes);
-        planPath(numNodes);
-     }
+// void mousePressed(){
+//   if(paused){
+//     if(mouseButton == LEFT){
+//          allObstacles.circles.add(new Circle(new Vec2(mouseX,mouseY),(10+40*pow(random(1),3))));
+//     }else{
+//          int id = agentList.size();
+//          if(agentList.size() < maxNumAgents){
+//              agentList.add(new Agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
+//          }
+//     }
+//   }
+//   else if (mouseButton == RIGHT){
+//      int id = agentList.size();
+//      if(agentList.size() < maxNumAgents){
+//         agentList.add(new Agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
+//         agentList.get(id).goal = sampleFreePos();
+//         connectNeighbors(nodePos,numNodes);
+//         planPath(numNodes);
+//      }
      
-  }
-}
+//   }
+// }
