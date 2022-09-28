@@ -46,12 +46,12 @@ public class Pair {
 //You can use any graph representation you like
 ArrayList<Pair>[] neighbors = new ArrayList[maxNumNodes];   //A list of neighbors can can be reached from a given node
 //We also want some help arrays to keep track of some information about nodes we've visited
-Boolean[] visited = new Boolean[maxNumNodes]; //A list which store if a given node has been visited
 int[] parent = new int[maxNumNodes]; //A list which stores the best previous node on the optimal path to reach this node
 int startAgentRadius = 10;
 int minDistance = 99999;
 float[] distanceToGoal = new float[maxNumNodes];
-boolean[] reach = new boolean[maxNumNodes];
+Boolean[] reach = new Boolean[maxNumNodes];
+Boolean[] visited = new Boolean[maxNumNodes];
 HashMap<Integer, Float> dist = new HashMap<Integer, Float>();
 HashMap<Integer, Integer> prev = new HashMap<Integer, Integer>();
 ArrayList<Integer> q = new ArrayList<Integer> ();
@@ -80,7 +80,7 @@ void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] no
   for(int i = 0; i < maxNumNodes; i++) {
       dist.put(i, 999999.0);
       prev.put(i, -1);
-      q.add(i);
+      visited[i] = false;
   }
 
   for(int i = 0; i < numNodes; i++) {
@@ -92,6 +92,7 @@ void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] no
     hitInfo circleListCheck2 = rayCircleListIntesect(centers, radii, nodePos[i], dir2, distBetween2);
     if (!circleListCheck.hit){
       dist.put(i, distBetween);
+      q.add(i);
     }
     if (!circleListCheck2.hit) {
       reach[i] = true;
@@ -144,6 +145,7 @@ HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, Vec2[] centers, 
       for(int i = 0; i < q.size(); i++) {
           if(min > dist.get(q.get(i))+distanceToGoal[q.get(i)]) {
             min = dist.get(q.get(i))+distanceToGoal[q.get(i)];
+            
             index = q.get(i);
             ind = i;
           }
@@ -152,15 +154,24 @@ HashMap<Integer, Integer> dijkstra(ArrayList<Pair>[] neighbors, Vec2[] centers, 
         return prev;
       }
       endTime = System.nanoTime();
-      println(" Time (us):", int((endTime-startTime)/1000));
+      //println(" Time (us):", int((endTime-startTime)/1000));
       q.remove(ind);
       
+      visited[index] = true;
+      
       for(int j = 0; j < neighbors[index].size(); j++) {
-          float alt = dist.get(index) + neighbors[index].get(j).y;
-          if(alt < dist.get(neighbors[index].get(j).x)) {
-              dist.put(neighbors[index].get(j).x, alt);
-              prev.put(neighbors[index].get(j).x, index);
-          }
+        boolean isVisited = visited[neighbors[index].get(j).x];
+        boolean isContain = q.contains(neighbors[index].get(j).x);
+        if(!isVisited && !isContain) {
+          //println("visited: ", visited[j], " index: ", index);
+          q.add(neighbors[index].get(j).x);
+        }
+        
+        float alt = dist.get(index) + neighbors[index].get(j).y;
+        if(alt < dist.get(neighbors[index].get(j).x)) {
+            dist.put(neighbors[index].get(j).x, alt);
+            prev.put(neighbors[index].get(j).x, index);
+        }
       }
     
     if(reach[index]) {
