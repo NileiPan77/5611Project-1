@@ -37,214 +37,254 @@
 // intended to illustrate the basic set-up for the assignmtent, don't assume 
 // this example funcationality is correct and end up copying it's mistakes!).
 
-
+// public class Pair {
+//   public int x;
+//   public float y;
+// }
 
 //Here, we represent our graph structure as a neighbor list
 //You can use any graph representation you like
-ArrayList<Integer>[] neighbors = new ArrayList[maxNumNodes];  //A list of neighbors can can be reached from a given node
+//ArrayList<Pair>[] neighbors = new ArrayList[maxNumNodes];   //A list of neighbors can can be reached from a given node
+ArrayList<Integer>[] neighbors = new ArrayList[maxNumNodes];
+ArrayList<Float>[] distBetweenNeighbors = new  ArrayList[maxNumNodes];
 //We also want some help arrays to keep track of some information about nodes we've visited
-Boolean[] visited = new Boolean[maxNumNodes]; //A list which store if a given node has been visited
 int[] parent = new int[maxNumNodes]; //A list which stores the best previous node on the optimal path to reach this node
-
-void generateRandomNodesGoalCentric(Vec2[] nodePos, int numNodes){
-    int i = 0;
-    //for(; i < numNodes/2; i++){
-    //  Vec2 randPos = new Vec2(random(width),random(height));
-    //  Vec2 ptoG = stoG.times(dot(randPos.minus(startPos),stoG));
-    //  ptoG.add(startPos);
-    //  ptoG.subtract(randPos);
-    //  randPos.add(new Vec2(random(ptoG.x/2)+ptoG.x/4,random(ptoG.y/2)+ptoG.y/4));
-    //  boolean insideAnyCircle = pointInCircleList(circleCenters,circleRadii,numObstacles,randPos,startAgentRadius);
-    //  while (insideAnyCircle){
-    //    randPos = new Vec2(random(width),random(height));
-    //    ptoG = stoG.times(dot(randPos.minus(startPos),stoG));
-    //    ptoG.add(startPos);
-    //    ptoG.subtract(randPos);
-    //    randPos.add(new Vec2(random(ptoG.x/2)+ptoG.x/4,random(ptoG.y/2)+ptoG.y/4));
-    //    //randPos.add(new Vec2(random(ptoG.x)+ptoG.x/2,random(ptoG.y)+ptoG.y/2));
-    //    insideAnyCircle = pointInCircleList(circleCenters,circleRadii,numObstacles,randPos,startAgentRadius);
-    //  }
-    //  nodePos[i] = randPos;
-    //}
-    for (; i < numNodes; i++){
-      Vec2 randPos = new Vec2(random(width),random(height));
-      boolean insideAnyCircle = allObstacles.pointInCircleList(randPos,startAgentRadius);
-      while (insideAnyCircle){
-        randPos = new Vec2(random(width),random(height));
-        insideAnyCircle = allObstacles.pointInCircleList(randPos,startAgentRadius);
-      }
-      nodePos[i] = randPos;
-    }
-    
-    for(int j = 0; j < agentList.size(); i++,j++){
-       nodePos[i] = agentList.get(j).goal; 
-    }
-
-}
-
-//void connectNewPoint( Vec2[] nodePos, int numNodes, Vec2 newPoint, int newIndex){
-//    neighbors[newIndex] = new ArrayList<Integer>();
-//    for (int i = 0; i < numNodes; i++){
-//      Vec2 dir = newPoint.minus(nodePos[i]).normalized();
-//      float distBetween = nodePos[i].distanceTo(newPoint);
-//      hitInfo circleListCheck = allObstacles.rayCircleListIntersect( nodePos[i], dir, distBetween, startAgentRadius);
-//      //hitInfo boxListCheck = rayBoxesListIntersect(boxTopLefts,boxW,boxH,nodePos[i],dir,distBetween);
-//      if (!circleListCheck.hit && distBetween < 200){
-//        neighbors[i].add(newIndex);
-//        neighbors[newIndex].add(i);
-//      }
-//  }
-  
-//}
-
-//void connectNewPointstoNeighbor(Vec2[] centers, float []radii, int numObstacles, Vec2[] nodePos, int numNodes, Vec2 newPoint, int newIndex){
-//  neighbors[newIndex] = new ArrayList<Integer>();  //Clear neighbors list
-//  for (int i = 0; i < numNodes; i++){
-//    Vec2 dir = nodePos[i].minus(newPoint).normalized();
-//    float distBetween = nodePos[i].distanceTo(newPoint);
-//    hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir, distBetween, startAgentRadius);
-//    //hitInfo boxListCheck = rayBoxesListIntersect(boxTopLefts,boxW,boxH,nodePos[i],dir,distBetween);
-//    if (!circleListCheck.hit && distBetween < 200){
-//      neighbors[newIndex].add(i);
-//    }
-//  }
-//  Vec2 dir = nodePos[numAgents+numNodes].minus(newPoint).normalized();
-//  float distBetween = nodePos[numAgents+numNodes].distanceTo(newPoint);
-//  hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[numAgents+numNodes], dir, distBetween, startAgentRadius);
-//  //hitInfo boxListCheck = rayBoxesListIntersect(boxTopLefts,boxW,boxH,nodePos[i],dir,distBetween);
-//  if (!circleListCheck.hit && distBetween < 200){
-//    neighbors[newIndex].add(numAgents+numNodes);
-//  }
-//}
+int startAgentRadius = 10;
+int minDistance = 99999;
+float[] distanceToGoal = new float[maxNumNodes];
+Boolean[] reach = new Boolean[maxNumNodes];
+Boolean[] visited = new Boolean[maxNumNodes];
+HashMap<Integer, Float> dist = new HashMap<Integer, Float>();
+HashMap<Integer, Integer> prev = new HashMap<Integer, Integer>();
+ArrayList<Integer> q = new ArrayList<Integer> ();
+int finalIndex = -1;
 
 //Set which nodes are connected to which neighbors (graph edges) based on PRM rules
-void connectNeighbors( Vec2[] nodePos, int numNodes){
-    for(int j = 0; j < agentList.size(); j++){
-       nodePos[j + numNodes] = agentList.get(j).goal; 
+void connectNeighbors(Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
+  for (int i = 0; i < numNodes; i++){
+    neighbors[i] = new ArrayList<Integer>();  //Clear neighbors list
+    distBetweenNeighbors[i] = new ArrayList<Float>();
+    distanceToGoal[i] = nodePos[i].distanceTo(goalPos);
+    for (int j = 0; j < numNodes; j++){
+      if (i == j) continue; //don't connect to myself 
+      Vec2 dir = nodePos[j].minus(nodePos[i]).normalized();
+      float distBetween = nodePos[i].distanceTo(nodePos[j]);
+      hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir, distBetween);
+      if (!circleListCheck.hit){
+        neighbors[i].add(j);
+        distBetween = nodePos[i].distanceTo(nodePos[j]);
+        distBetweenNeighbors[i].add(distBetween);
+      }
     }
-    for (int i = 0; i < numNodes + agentList.size(); i++){
-        neighbors[i] = new ArrayList<Integer>();  //Clear neighbors list
-        for (int j = 0; j < numNodes + agentList.size(); j++){
-          
-            if (i == j) continue; //don't connect to myself 
-      
-            Vec2 dir = nodePos[j].minus(nodePos[i]).normalized();
-            float distBetween = nodePos[i].distanceTo(nodePos[j]);
-            hitInfo circleListCheck = allObstacles.rayCircleListIntersect(nodePos[i], dir, distBetween, startAgentRadius);
-            //hitInfo boxListCheck = rayBoxesListIntersect(boxTopLefts,boxW,boxH,nodePos[i],dir,distBetween);
-            if (!circleListCheck.hit && distBetween < 200){
-                neighbors[i].add(j);
-            }
-        }
+    reach[i] = false;
+  }
+
+  for(int i = 0; i < maxNumNodes; i++) {
+      dist.put(i, 999999.0);
+      prev.put(i, -1);
+      visited[i] = false;
+  }
+
+  for(int i = 0; i < numNodes; i++) {
+    Vec2 dir = nodePos[i].minus(startPos).normalized();
+    float distBetween = nodePos[i].distanceTo(startPos);
+    Vec2 dir2 = goalPos.minus(nodePos[i]).normalized();
+    float distBetween2 = nodePos[i].distanceTo(goalPos);
+    hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, startPos, dir, distBetween);
+    hitInfo circleListCheck2 = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir2, distBetween2);
+    if (!circleListCheck.hit){
+      dist.put(i, distBetween);
+      q.add(i);
     }
-    //setup agents' neighbor
-    for(int i = 0; i < agentList.size(); i++){
-         for(int j = 0; j < numNodes; j++){
-              Vec2 dir = nodePos[j].minus(agentList.get(i).pos).normalized();
-              float distBetween = agentList.get(i).pos.distanceTo(nodePos[j]);
-              hitInfo circleListCheck = allObstacles.rayCircleListIntersect(agentList.get(i).pos, dir, distBetween, startAgentRadius);
-              if (!circleListCheck.hit && distBetween < 200){
-                   agentList.get(i).neighbors.add(j);
-              }
-         }
+    if (!circleListCheck2.hit) {
+      reach[i] = true;
     }
-    
-    //connect goal to agents
-    for(int i = 0; i < agentList.size(); i++){
-          Vec2 dir = agentList.get(i).goal.minus(agentList.get(i).pos).normalized();
-          float distBetween = agentList.get(i).pos.distanceTo(agentList.get(i).goal);
-          hitInfo circleListCheck = allObstacles.rayCircleListIntersect(agentList.get(i).pos, dir, distBetween, startAgentRadius);
-          if (!circleListCheck.hit && distBetween < 200){
-               agentList.get(i).neighbors.add(agentList.get(i).goalIndex);
-          }
-    }
+  }
 }
 
 //This is probably a bad idea and you shouldn't use it...
-int closestNode(Vec2 point, Vec2[] nodePos, int numNodes){
-  int closestID = -1;
-  float minDist = 999999;
-  for (int i = 0; i < numNodes; i++){
-    float dist = nodePos[i].distanceTo(point);
-    if (dist < minDist){ //<>//
-      closestID = i;
-      minDist = dist;
-    }
-  }
-  return closestID;
-}
-//ArrayList<Integer> planPathOne(int numNodes, int agentIndex){
-//  ArrayList<Integer> path = new ArrayList();
+// int closestNode(Vec2[] centers, float[] radii, Vec2 point, Vec2[] nodePos, int numNodes){
+//   int closestID = -1;
+//   float minDist = 999999;
+//   for (int i = 0; i < numNodes; i++){
+//     float dist = nodePos[i].distanceTo(point);
+//     Vec2 dir = point.minus(nodePos[i]).normalized();
+//     float distBetween = nodePos[i].distanceTo(point);
+//     hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, nodePos[i], dir, distBetween);
+//     if (dist < minDist && !circleListCheck.hit){
+//       closestID = i;
+//       minDist = dist;
+//     }
+//   }
+//   return closestID;
+// }
+
+ArrayList<Integer> planPath(Vec2 startPos, Vec2 goalPos, Vec2[] centers, float[] radii, int numObstacles, Vec2[] nodePos, int numNodes){
+  ArrayList<Integer> path = new ArrayList();
   
-//  path = runBFS(numNodes,numNodes + agentIndex,agentList.size()+numNodes);
-//  println(path);
-//  return path;
-//}
-void planPath(int numNodes){
-  for(int i = 0; i < agentList.size(); i++){
-    agentList.get(i).path = runBFS(numNodes,i,agentList.get(i).goalIndex);
-    println(agentList.get(i).path);
-    agentList.get(i).pathIndex = 0;
+  Vec2 dir = startPos.minus(goalPos).normalized();
+  float distBetween = goalPos.distanceTo(startPos);
+  hitInfo circleListCheck = rayCircleListIntersect(centers, radii, numObstacles, goalPos, dir, distBetween);
+  if(!circleListCheck.hit) {
+    return path;
   }
+  
+  path = runBFS(nodePos, numNodes, centers, radii);
+  
+  
+  return path;
 }
 
 //BFS (Breadth First Search)
-ArrayList<Vec2> runBFS(int numNodes, int agentID, int goalID){
-  ArrayList<Integer> fringe = new ArrayList();  //New empty fringe
-  ArrayList<Vec2> path = new ArrayList();
-  for (int i = 0; i < numNodes+ agentList.size(); i++) { //Clear visit tags and parent pointers
-    visited[i] = false;
-    parent[i] = -1; //No parent yet
-  }
-
-  //println("\nBeginning Search");
-  parent[999] = -1;
-  ArrayList<Integer> agentNeighbor = agentList.get(agentID).neighbors;
-  for(int i = 0; i < agentNeighbor.size();i++){
-      fringe.add(agentNeighbor.get(i));
-      visited[agentNeighbor.get(i)] = true;
-      parent[i] = 999;
-  }
+HashMap<Integer, Integer> dijkstra(ArrayList<Integer>[] neighbors, Vec2[] centers, float[] radii) {
+  long startTime, endTime;
   
-  //println("Adding node", startID, "(start) to the fringe.");
-  //println(" Current Fringe: ", fringe);
-  
-  while (fringe.size() > 0){
-    int currentNode = fringe.get(0);
-    fringe.remove(0);
-    if (currentNode == goalID){
-      //println("Goal found!");
-      break;
-    }
-    for (int i = 0; i < neighbors[currentNode].size(); i++){
-      int neighborNode = neighbors[currentNode].get(i);
-      if (!visited[neighborNode]){
-        visited[neighborNode] = true;
-        parent[neighborNode] = currentNode;
-        fringe.add(neighborNode);
-        //println("Added node", neighborNode, "to the fringe.");
-        //println(" Current Fringe: ", fringe);
+  while(q.size() != 0) {
+      float min = 99999;
+      int index = -1;
+      int ind = -1;
+      startTime = System.nanoTime();
+      for(int i = 0; i < q.size(); i++) {
+          if(min > dist.get(q.get(i))+distanceToGoal[q.get(i)]) {
+            min = dist.get(q.get(i))+distanceToGoal[q.get(i)];
+            
+            index = q.get(i);
+            ind = i;
+          }
       }
-    } 
+      if(index == -1) {
+        return prev;
+      }
+      endTime = System.nanoTime();
+      //println(" Time (us):", int((endTime-startTime)/1000));
+      q.remove(ind);
+      
+      visited[index] = true;
+      
+      for(int j = 0; j < neighbors[index].size(); j++) {
+        boolean isVisited = visited[neighbors[index].get(j)];
+        boolean isContain = q.contains(neighbors[index].get(j));
+        if(!isVisited && !isContain) {
+          //println("visited: ", visited[j], " index: ", index);
+          q.add(neighbors[index].get(j));
+        }
+        
+        float alt = dist.get(index) + distBetweenNeighbors[index].get(j);
+        if(alt < dist.get(neighbors[index].get(j))) {
+            dist.put(neighbors[index].get(j), alt);
+            prev.put(neighbors[index].get(j), index);
+        }
+      }
+    
+    if(reach[index]) {
+      finalIndex = index;
+      return prev;
+    }
   }
+    
   
-  if (fringe.size() == 0){
-    //println("No Path");
-    path.add(new Vec2(-1,-1));
+  return prev;
+}
+
+ArrayList<Integer> runBFS(Vec2[] nodePos, int numNodes, Vec2[] centers, float[] radii) {
+  HashMap<Integer, Integer> prev = dijkstra(neighbors, centers, radii);
+  int next = prev.get(finalIndex);
+  ArrayList<Integer> path = new ArrayList<Integer>();
+  if(finalIndex == -1) {
     return path;
   }
-  print("\nReverse path: ");
-  int prevNode = parent[goalID];
-  path.add(nodePos[goalID]);
-  while (prevNode >= 0){
-    //print(prevNode," ");
-    if(nodePos[prevNode] != null){
-        path.add(nodePos[prevNode]);
+  ArrayList<Integer> pathTmp = new ArrayList<Integer>();
+  pathTmp.add(finalIndex);
+  while(next != -1) {
+    pathTmp.add(next);
+    next = prev.get(next);
+  }
+  for(int i = pathTmp.size()-1; i >= 0; i--) {
+    path.add(pathTmp.get(i));
+  }
+  return path;
+}
+
+//Compute collision tests. Code from the in-class exercises may be helpful ehre.
+
+//Returns true if the point is inside a circle
+//You must consider a point as colliding if it's distance is <= eps
+boolean pointInCircle(Vec2 center, float r, Vec2 pointPos, float eps){
+  float dist = pointPos.distanceTo(center);
+  if (dist < r+eps){
+    return true;
+  }
+  return false;
+}
+
+//Returns true if the point is inside a list of circle
+//You must consider a point as colliding if it's distance is <= eps
+boolean pointInCircleList(Vec2[] centers, float[] radii, int numObstacles, Vec2 pointPos, float eps){
+  for (int i = 0; i < numObstacles; i++){
+    Vec2 center =  centers[i];
+    float r = radii[i];
+    if(pointInCircle(center,r,pointPos,eps)){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+class hitInfo{
+  public boolean hit = false;
+  public float t = 9999999;
+}
+
+hitInfo rayCircleIntesect(Vec2 center, float r, Vec2 l_start, Vec2 l_dir, float max_t){
+  hitInfo hit = new hitInfo();
+  
+  //Step 2: Compute W - a displacement vector pointing from the start of the line segment to the center of the circle
+    Vec2 toCircle = center.minus(l_start);
+    
+    //Step 3: Solve quadratic equation for intersection point (in terms of l_dir and toCircle)
+    float a = 1;  //Length of l_dir (we normalized it)
+    float b = -2*dot(l_dir,toCircle); //-2*dot(l_dir,toCircle)
+    float c = toCircle.lengthSqr() - (r+strokeWidth)*(r+strokeWidth); //different of squared distances
+    
+    float d = b*b - 4*a*c; //discriminant 
+    
+    if (d >=0 ){ 
+      //If d is positive we know the line is colliding, but we need to check if the collision line within the line segment
+      //  ... this means t will be between 0 and the length of the line segment
+      float t1 = (-b - sqrt(d))/(2*a); //Optimization: we only need the first collision
+      float t2 = (-b + sqrt(d))/(2*a); //Optimization: we only need the first collision
+      //println(hit.t,t1,t2);
+      if (t1 > 0 && t1 < max_t){
+        hit.hit = true;
+        hit.t = t1;
+      }
+      else if (t1 < 0 && t2 > 0){
+        hit.hit = true;
+        hit.t = -1;
+      }
+      
     }
     
-    prevNode = parent[prevNode];
+  return hit;
+}
+
+hitInfo rayCircleListIntersect(Vec2[] centers, float[] radii, int numObstacles, Vec2 l_start, Vec2 l_dir, float max_t){
+  hitInfo hit = new hitInfo();
+  hit.t = max_t;
+  for (int i = 0; i < numObstacles; i++){
+    Vec2 center = centers[i];
+    float r = radii[i];
+    
+    hitInfo circleHit = rayCircleIntesect(center, r, l_start, l_dir, hit.t);
+    if (circleHit.t > 0 && circleHit.t < hit.t){
+      hit.hit = true;
+      hit.t = circleHit.t;
+    }
+    else if (circleHit.hit && circleHit.t < 0){
+      hit.hit = true;
+      hit.t = -1;
+    }
   }
-  print("\n");
-  Collections.reverse(path);
-  return path;
+  return hit;
 }
