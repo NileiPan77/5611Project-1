@@ -25,7 +25,10 @@ We implement the Multiple Agents Planning in Proj1-ui folder. THe video is the s
 ##### Part 3
 
 - TTC collision avoidance <br />
+![Part3 Crownd Simulation](https://user-images.githubusercontent.com/57411086/193348490-6efc9b07-b087-4595-a529-bdca9a0ce2f0.gif) <br />
+We implement the Crowd Simulation in Proj1-ui folder. This is the first interesting senario where if you put multiple agents in the same place, they shall move like a boid behavior, which they goes together for a short time and reach to their own goal. <br />
+![Part3 Crownd Simulation 2](https://user-images.githubusercontent.com/57411086/193349744-3c9ec728-238f-47d6-8d7d-08b492b91105.gif) <br />
+This is another interesting senario where when two agents tend to collise with each other, they shall move together or one of the agent shall go out of the way and go back to its final position. <br />
 
-We implement the Crowd Simulation in Proj1-ui folder. This is the first interesting senario where if you put multiple agents in the same place, they shall move 
 
 
