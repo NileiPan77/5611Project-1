@@ -3,7 +3,7 @@ public class Obstacles{
     public ArrayList<Box> boxes;
     
     ObjMesh treeMesh;
-    ObjMesh treeMesh2;
+    
 
     public Obstacles(ArrayList<Circle> c, ArrayList<Box> b){
         this.circles = c;

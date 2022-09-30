@@ -26,6 +26,8 @@ int width = 600;
 int height = 600;
 
 Obstacles allObstacles = new Obstacles(new ArrayList<Circle>(),new ArrayList<Box>());
+ObjMesh star;
+ObjMesh crown;
 
 int maxNumAgents = 3;
 ArrayList<agent> agentList = new ArrayList<>();
@@ -52,10 +54,8 @@ void setup(){
   size(1024,768,P3D);
   agentList = new ArrayList<>();
 
-
-  //allObstacles.circles.add(new Circle(new Vec2(100,100),30));
-  
-
+  crown = new ObjMesh("./data/Crown.obj");
+  star = new ObjMesh("./data/Star.obj");
   allObstacles.treeMesh = new ObjMesh("./data/BirchTree_Autumn_3.obj");
   allObstacles.treeMesh.position = new PVector(0,0,0);
   allObstacles.treeMesh.rotation = new PVector(-90, 0, 180);
@@ -66,6 +66,7 @@ void setup(){
 
   for(int i = 0; i < maxNumAgents; i++){
     agentList.add(new agent(sampleFreePos(),new Vec2(0,0),numNodes + i, new ArrayList<Vec2>(), i));
+    
   }
 
   camera = new Camera();
@@ -90,11 +91,6 @@ void testPRM(){
 
 void draw(){
   background(255);
-  // background(200); //Grey background
-  // strokeWeight(1);
-  // stroke(0,0,0);
-  // fill(255,255,255);
-
 
   camera.update(1.0/frameRate);
   directionalLight(255.0, 255.0, 255.0, -1, 1, -1);
@@ -103,7 +99,7 @@ void draw(){
 
   
 
-  fill(0,200,0);
+  fill(0,200,175);
   pushMatrix();
   translate(300, 300, 0); 
   box(600, 600, 1);
@@ -113,41 +109,6 @@ void draw(){
         agentList.get(i).update(1/frameRate);
         agentList.get(i).draw3DAgent();
   }
-
-  /*
-  if(!paused){
-    if(firstTimeSetup){
-      testPRM();
-      firstTimeSetup = false;
-    }
-    
-    for(int i = 0; i < agentList.size(); i++){
-        agentList.get(i).update(1/frameRate);
-    }
-
-    //Draw PRM Nodes
-    fill(0);
-    for (int i = 0; i < numNodes; i++){
-      circle(nodePos[i].x,nodePos[i].y,5);
-    }
-    //Draw graph
-      stroke(100,100,100);
-      strokeWeight(1);
-      for (int i = 0; i < numNodes; i++){
-        for (int j : neighbors[i]){
-          line(nodePos[i].x,nodePos[i].y,nodePos[j].x,nodePos[j].y);
-        }
-      }
-      fill(250,30,50);
-      for(int i = 0; i < agentList.size(); i++){
-          circle(agentList.get(i).goal.x,agentList.get(i).goal.y,2*agentList.get(i).radius);
-      }
-  }
-  */
-  //Draw Start and Goal
-  
-  //Draw the circle obstacles
-  //allObstacles.drawObstacles();
   
 }
 

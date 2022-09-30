@@ -2,17 +2,6 @@ float k_goal = 1.4;
 float k_avoid = 60;
 float goalSpeed = 50;
 
-public Vec2 calPointA(Vec2 center, float side){
-    return new Vec2(center.x,center.y-0.577*side);
-}
-
-public Vec2 calPointB(Vec2 center, float side){
-    return new Vec2(center.x-side*0.5,center.y+0.289*side);
-}
-
-public Vec2 calPointC(Vec2 center, float side){
-    return new Vec2(center.x+side*0.5,center.y+0.289*side);
-}
 public class agent{
     Vec2 vel;
     Vec2 pos;
@@ -30,6 +19,8 @@ public class agent{
     int goalIndex;
     int myIndex;
     int id;
+    
+    
     
     float radius;
     //Triangle length
@@ -188,28 +179,11 @@ public class agent{
     }
 
     public void draw3DAgent(){
-        // stroke(100,100,100);
-        // strokeWeight(1);
-        // fill(20,60,250);
-        // pushMatrix();
-        // translate(this.pos.x,this.pos.y);
-        // Vec2 dir = this.vel.normalized();
-        // rotate(atan2(dir.y,dir.x));
-        // triangle(-10, -13, -10, 13, 17, 0);
-        // popMatrix();
         fill(20,60,250);
-        noStroke();
-        pushMatrix();
-        translate(this.pos.x, this.pos.y, this.radius);
-        sphere(this.radius/2);
-        popMatrix();
+        star.drawWithTransform(new PVector(this.pos.x, this.pos.y, this.radius),new PVector(-90,0,180),this.radius*1.5);
 
         fill(250,30,50);
-        noStroke();
-        pushMatrix();
-        translate(this.goal.x, this.goal.y, this.radius);
-        sphere(this.radius/2);
-        popMatrix();
+        crown.drawWithTransform(new PVector(this.goal.x, this.goal.y, this.radius),new PVector(-90,0,180),this.radius*1.5);
     }
 
     public void update(float dt){
