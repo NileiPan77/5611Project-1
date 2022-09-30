@@ -3,7 +3,7 @@ float k_avoid = 60;
 float agentRad = 40;
 float goalSpeed = 100;
 
-public class Agent{
+public class agent{
     Vec2 vel;
     Vec2 pos;
     Vec2 acc;
@@ -19,7 +19,7 @@ public class Agent{
     float radius;
 
 
-    public Agent(Vec2 Position, Vec2 goal, int goalID, ArrayList<Vec2> p, int id){
+    public agent(Vec2 Position, Vec2 goal, int goalID, ArrayList<Vec2> p, int id){
         this.path = p;
         this.vel = goal.minus(Position);
         if(this.vel.length() > 0){
@@ -79,7 +79,7 @@ public class Agent{
     public float computeTTC(Vec2 pos2, Vec2 vel2, float radius2){
         return this.rayCircleIntersectTime(pos2,radius2+this.radius,this.pos,this.vel.minus(vel2));
     }
-    public void computeAgentForces(ArrayList<Agent> agents){
+    public void computeAgentForces(ArrayList<agent> agents){
         Vec2 goal_vel = this.path.get(this.pathIndex).minus(this.pos);
         Vec2 goal_acc = goal_vel.minus(this.vel).times(k_goal);
         
@@ -158,6 +158,18 @@ public class Agent{
         return -1; //We are not colliding, so there is no good t to return
     }
     
+    public void drawAgent(){
+        stroke(100,100,100);
+        strokeWeight(1);
+        fill(20,60,250);
+        pushMatrix();
+        translate(this.pos.x,this.pos.y);
+        Vec2 dir = this.vel.normalized();
+        rotate(atan2(dir.y,dir.x));
+        triangle(-10, -13, -10, 13, 17, 0);
+        popMatrix();  
+    }
+    
     public void update(float dt){
         if(this.path.size() > 0 && this.path.get(0).x == -1){
             return;
@@ -168,6 +180,9 @@ public class Agent{
         this.checkVisibleNodes();
         this.computeAgentForces(agentList);
         this.vel.add(this.acc.times(dt));
+        if(this.vel.length() > 50){
+           this.vel.setToLength(50);
+        }
         if(this.pathIndex != this.path.size()-1 && this.pos.distanceTo(this.path.get(this.pathIndex)) < this.vel.times(dt*5).length()){
              this.pathIndex++;
         }

@@ -13,7 +13,7 @@ public Vec2 calPointB(Vec2 center, float side){
 public Vec2 calPointC(Vec2 center, float side){
     return new Vec2(center.x+side*0.5,center.y+0.289*side);
 }
-public class Agent{
+public class agent{
     Vec2 vel;
     Vec2 pos;
     //For triangle
@@ -35,7 +35,7 @@ public class Agent{
     //Triangle length
     float side;
 
-    public Agent(Vec2 Position, Vec2 goal, int goalID, ArrayList<Vec2> p, int id){
+    public agent(Vec2 Position, Vec2 goal, int goalID, ArrayList<Vec2> p, int id){
         this.path = p;
         this.vel = goal.minus(Position);
         if(this.vel.length() > 0){
@@ -96,7 +96,7 @@ public class Agent{
     public float computeTTC(Vec2 pos2, Vec2 vel2, float radius2){
         return this.rayCircleIntersectTime(pos2,radius2+this.radius,this.pos,this.vel.minus(vel2));
     }
-    public void computeAgentForces(ArrayList<Agent> agents){
+    public void computeAgentForces(ArrayList<agent> agents){
         Vec2 goal_vel = this.path.get(this.pathIndex).minus(this.pos);
         Vec2 goal_acc = goal_vel.minus(this.vel).times(k_goal);
         

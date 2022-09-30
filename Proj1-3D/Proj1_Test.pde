@@ -28,7 +28,7 @@ int height = 600;
 Obstacles allObstacles = new Obstacles(new ArrayList<Circle>(),new ArrayList<Box>());
 
 int maxNumAgents = 3;
-ArrayList<Agent> agentList = new ArrayList<>();
+ArrayList<agent> agentList = new ArrayList<>();
 
 int startAgentRadius = 20;
 static int maxNumNodes = 1000;
@@ -65,7 +65,7 @@ void setup(){
   allObstacles.makeRandomPositions();
 
   for(int i = 0; i < maxNumAgents; i++){
-    agentList.add(new Agent(sampleFreePos(),new Vec2(0,0),numNodes + i, new ArrayList<Vec2>(), i));
+    agentList.add(new agent(sampleFreePos(),new Vec2(0,0),numNodes + i, new ArrayList<Vec2>(), i));
   }
 
   camera = new Camera();

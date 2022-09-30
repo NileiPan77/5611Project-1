@@ -28,7 +28,7 @@ Vec2 startPos = new Vec2(100,500);
 Vec2 goalPos = new Vec2(500,200);
 
 int maxNumAgents = 10;
-ArrayList<Agent> agentList = new ArrayList<>();
+ArrayList<agent> agentList = new ArrayList<>();
 
 int startAgentRadius = 10;
 static int maxNumNodes = 1000;
@@ -62,7 +62,6 @@ int strokeWidth = 2;
 void setup(){
   size(1024,768);
   agentList = new ArrayList<>();
-  allObstacles.circles.add(new Circle(new Vec2(100,100),30));
   testPRM();
 }
 
@@ -70,49 +69,18 @@ void setup(){
 void testPRM(){
   
   if(!paused){
-      long startTime, endTime;
       for(int i = 0; i < agentList.size(); i++){
          agentList.get(i).goal = sampleFreePos();
          println("goal is: ", agentList.get(i).goal);
       }
       generateRandomNodesGoalCentric(nodePos, numNodes);
-      //generateRandomNodes(numNodes, circlePos, circleRad);
       connectNeighbors(nodePos, numNodes);
       
-      startTime = System.nanoTime();
       planPath(numNodes);
-      endTime = System.nanoTime();
-      //pathQuality();
-      
-      //for(int i = 0; i < agentList.size(); i++){
-      //  println("Nodes:", numNodes," Obstacles:", numObstacles," Time (us):", int((endTime-startTime)/1000),
-      //        " Path Len:", pathLength, " Path Segment:", curPath[i].size()+1,  " Num Collisions:", numCollisions);
-      //}
       
    }
   
 }
-
-
-//int []curPathIndex = new int[maxNumAgents];
-float speed = 30;
-Vec2 agentDir;
-
-
-//void updateAgent(float dt, int agentId){
-//   if (curPath[agentId].size() >0 && curPath[agentId].get(0) == -1) return;
-//   if(curPathIndex[agentId] >= curPath[agentId].size()) return;
-//   Vec2 curGoal = nodePos[curPath[agentId].get(curPathIndex[agentId])];
-//   agentDir = nodePos[curPath[agentId].get(curPathIndex[agentId])].minus(agents[agentId]);
-//   if(agents[agentId].distanceTo(curGoal) < speed * dt){
-//       agents[agentId] = curGoal;
-//       curPathIndex[agentId]++;
-//   }else{
-//       //println("moving towards: ",curPath.get(curPathIndex));
-//       agentDir.normalize();
-//       agents[agentId].add(agentDir.times(speed*dt));
-//   }
-//}
 
 void draw(){
   
@@ -160,11 +128,8 @@ void draw(){
   }
    
   //Draw Start and Goal
-  stroke(100,100,100);
-  strokeWeight(1);
-  fill(20,60,250);
   for(int i = 0; i < agentList.size(); i++){
-      circle(agentList.get(i).pos.x,agentList.get(i).pos.y,2*agentList.get(i).radius);
+      agentList.get(i).drawAgent();
   }
   
   
@@ -178,22 +143,11 @@ void draw(){
     float r = allObstacles.circles.get(i).radius;
     circle(c.x,c.y,r*2);
   }
-  ////Draw the first circle a little special b/c the user controls it
-  //fill(240);
-  //strokeWeight(2);
-  //circle(allObstacles.circles.get(0).center.x,allObstacles.circles.get(0).center.y,allObstacles.circles.get(0).radius*2);
-  //strokeWeight(1);
-  
-  
-  
-  
   
 }
 
 
-boolean shiftDown = false;
 void keyPressed(){
-  //camera.HandleKeyPressed();
   if(key == ' '){
     paused = !paused;
   }
@@ -204,37 +158,11 @@ void keyPressed(){
     }
     
   }
-  
-  if (keyCode == SHIFT){
-    shiftDown = true;
-  }
-  
-  float speed = 10;
-  if (shiftDown) speed = 30;
-  if (keyCode == RIGHT){
-    allObstacles.circles.get(0).center.x += speed;
-  }
-  if (keyCode == LEFT){
-    allObstacles.circles.get(0).center.x -= speed;
-  }
-  if (keyCode == UP){
-    allObstacles.circles.get(0).center.y -= speed;
-  }
-  if (keyCode == DOWN){
-    allObstacles.circles.get(0).center.y += speed;
-  }
   if(!paused && !firstTimeSetup){
     connectNeighbors(nodePos, numNodes);
     planPath(numNodes);
   }
 }
-
-void keyReleased(){
-  if (keyCode == SHIFT){
-    shiftDown = false;
-  }
-}
-
 void mousePressed(){
   if(paused){
     if(mouseButton == LEFT){
@@ -242,14 +170,14 @@ void mousePressed(){
     }else{
          int id = agentList.size();
          if(agentList.size() < maxNumAgents){
-             agentList.add(new Agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
+             agentList.add(new agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
          }
     }
   }
   else if (mouseButton == RIGHT){
      int id = agentList.size();
      if(agentList.size() < maxNumAgents){
-        agentList.add(new Agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
+        agentList.add(new agent(new Vec2(mouseX,mouseY),new Vec2(0,0),numNodes + id, new ArrayList<Vec2>(), id));
         agentList.get(id).goal = sampleFreePos();
         connectNeighbors(nodePos,numNodes);
         planPath(numNodes);
