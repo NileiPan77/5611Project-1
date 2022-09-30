@@ -2,14 +2,14 @@ Camera camera;
 PImage spriteBlue;
 PImage spriteRed;
 PImage greenLand;
-int numOfTrees = 60;
+int numOfTrees = 120;
 ObjMesh[] tree = new ObjMesh[numOfTrees];
 ObjMesh people;
 //randomPeople is the startPos
 Vec2 randomPeople;
 Vec2 goalPosition;
 Vec2 peoplePos = new Vec2(0,0);
-int numNodes = 100;
+int numNodes = 120;
 Vec2[] nodePos = new Vec2[numNodes];
 ArrayList<Integer> curPath;
 boolean noWay = false;
@@ -17,8 +17,8 @@ boolean direct = false;
 
 PVector[] positions;
 Vec2[] centers = new Vec2[numOfTrees];
-float radius = 10;
-float[] radii = new float[numNodes];
+float radius = 20;
+float[] radii = new float[numOfTrees];
 float speed = 50.0f;
 
 void setup()
@@ -67,28 +67,28 @@ void setup()
     tree[i].scale = 40.0f;
   }
 
-  randomPeople = new Vec2(random(-500, 500), random(-500, 500));
+  randomPeople = new Vec2(random(-800, 800), random(-800, 800));
   peoplePos.x = randomPeople.x;
   peoplePos.y = randomPeople.y;
   boolean insideAnyCircle = circleInCircleList(centers, radius, randomPeople, radius, numOfTrees);
   while(insideAnyCircle) {
-    randomPeople = new Vec2(random(-500, 500), random(-500, 500));
+    randomPeople = new Vec2(random(-800, 800), random(-800, 800));
     insideAnyCircle = circleInCircleList(centers, radius, randomPeople, radius, numOfTrees);
   }
   people = new ObjMesh("Male_Shirt.obj");
   people.position = new PVector(randomPeople.x, randomPeople.y, 0);
   people.rotation = new PVector(-90, 0, 180);
 
-  goalPosition = new Vec2(random(-500, 500), random(-500, 500));
+  goalPosition = new Vec2(random(-800, 800), random(-800, 800));
   insideAnyCircle = circleInCircleList(centers, radius, goalPosition, radius, numOfTrees);
   while(insideAnyCircle) {
-    goalPosition = new Vec2(random(-500, 500), random(-500, 500));
+    goalPosition = new Vec2(random(-800, 800), random(-800, 800));
     insideAnyCircle = circleInCircleList(centers, radius, goalPosition, radius, numOfTrees);
   }
 
   camera.position = new PVector(randomPeople.x+200,randomPeople.y+200,500);
 
-  for(int i = 0; i < numNodes; i++) {
+  for(int i = 0; i < numOfTrees; i++) {
     radii[i] = radius;
   }
   
@@ -178,6 +178,11 @@ void draw()
     tree[i].draw();
   }
 
+  fill(20, 200, 150);
+  for(int i = 0; i < numOfTrees; i++) {
+    circle(centers[i].x, centers[i].y, radius*2);
+  }
+
   if(!paused) {
     update(1.0/frameRate);
   }
@@ -213,10 +218,10 @@ void generateRandomTrees(int numTrees, float radius) {
   centers[nums] = center;
   nums++;
   while(nums < numTrees) {
-    center = new Vec2(random(-500, 500), random(-500, 500));
+    center = new Vec2(random(-800, 800), random(-800, 800));
     boolean insideAnyCircle = circleInCircleList(centers, radius, center, radius, nums);
     while(insideAnyCircle) {
-      center = new Vec2(random(-500, 500), random(-500, 500));
+      center = new Vec2(random(-800, 800), random(-800, 800));
       insideAnyCircle = circleInCircleList(centers, radius, center, radius, nums);
     }
     centers[nums] = new Vec2(0,0);
