@@ -75,11 +75,11 @@ public class Obstacles{
     public void makeRandomPositions(){
         for(int i = 0; i < numObstacles; i++){
             Vec2 position = new Vec2(random(width),random(height));
-            float radius = random(5)+5;
+            float radius = random(5);
             boolean hit = pointInCircleList(position,radius);
             while(hit){
                 position = new Vec2(random(width),random(height));
-                radius = random(5)+5;
+                radius = random(5);
                 hit = pointInCircleList(position,radius);
             }
             this.circles.add(new Circle(position,radius));
