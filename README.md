@@ -14,7 +14,7 @@ Team Member 2:
 
 #### Feature Implemented
 
-##### Par2
+##### Part2
 
 - Single Agent Navigation <br />
 ![ezgif com-gif-maker](https://user-images.githubusercontent.com/57411086/193336458-3d989052-6cc4-4397-a900-52fad8be3373.gif) <br />
